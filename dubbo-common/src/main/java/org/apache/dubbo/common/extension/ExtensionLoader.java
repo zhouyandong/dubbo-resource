@@ -88,7 +88,7 @@ public class ExtensionLoader<T> {
 
     //key:spi注解修饰的interface value:对应的ExtensionLoader
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<>(64);
-
+    //key:扩展类对象 value:对象的实例
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<>(64);
 
     //被spi注解修饰的interface
