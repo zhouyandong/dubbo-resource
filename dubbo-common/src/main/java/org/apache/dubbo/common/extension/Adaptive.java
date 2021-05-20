@@ -26,6 +26,43 @@ import java.lang.annotation.Target;
 
 /**
  * Provide helpful information for {@link ExtensionLoader} to inject dependency extension instance.
+ * Adaptive注解被应用于接口方法上或者接口的扩展类上
+ * 被注解到接口的扩展类上时 被标注的扩展类可以视为代理 代理类代理了其他扩展类
+ * 对其他扩展类的选择逻辑由扩展类内部自定义
+ *
+ * Adaptive注解被应用于接口方法上时 代理类需要AdaptiveClassCodeGenerator动态生成并且编译加载
+ * 比如：
+ *  public interface XianYu {
+ *      void sleep();
+ *      @Adaptive
+ *      void touchFish();
+ *  }
+ *
+ *  public class XianYu1 implements XianYu {
+ *      public void touchFish() {
+ *          System.out.println("xianyu1");
+ *      }
+ *  }
+ *
+ *  public class XianYu2 implements XianYu {
+ *      public void touchFish() {
+ *          System.out.printlb("xianyu2");
+ *      }
+ *  }
+ *
+ *  最终会在程序运行过程中动态生成一个代理类
+ *  代理类通过传入参数获取对应的扩展类，实际调用扩展类的方法
+ *  public class XianYu$Adaptive implements XianYu {
+ *      public void sleep(URL url){
+ *          throw Exception();
+ *      }
+ *
+ *      public void touchFish(URL url){
+ *          String name = url.getName();
+ *          XianYu extension = getExtension(name);
+ *          extension.touchFish();
+ *      }
+ *  }
  *
  * @see ExtensionLoader
  * @see URL

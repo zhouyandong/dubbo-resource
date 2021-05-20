@@ -18,7 +18,7 @@ package org.apache.dubbo.common.extension;
 
 /**
  * Dubbo internal {@link LoadingStrategy}
- *
+ * 加载META-INF/dubbo/internal/目录下的扩展类
  * @since 2.7.7
  */
 public class DubboInternalLoadingStrategy implements LoadingStrategy {

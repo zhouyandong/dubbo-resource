@@ -105,11 +105,7 @@ public class ExtensionLoader<T> {
     private final Map<String, Object> cachedActivates = new ConcurrentHashMap<>();
     //key:配置文件中扩展类的name value:扩展类的对象实例封装的holder
     private final ConcurrentMap<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<>();
-    //动态生成的类的实例对象 为了实现用@Adaptive修饰方法的功能
-    //如果一个接口中有方法被标记为@Adaptive 会用StringBuilder动态生成一个类 类名为 [interface]$Adaptive
-    //每一个没被@Adaptive标记的方法的方法体内部会throw exception
-    //每一个被@Adaptive标记的方法的入参为URL类对象 内部实现为获取当前接口的所有扩展类对象
-    //通过解析URL中的值来决定实际调用哪一个扩展类实例对象的方法
+    //Adaptive实例对象
     private final Holder<Object> cachedAdaptiveInstance = new Holder<>();
     //Adaptive class对象
     private volatile Class<?> cachedAdaptiveClass = null;

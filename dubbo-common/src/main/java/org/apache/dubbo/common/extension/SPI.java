@@ -50,6 +50,19 @@ import java.lang.annotation.Target;
  * Fails to load Extension("mina"). When user configure to use mina, dubbo will complain the extension cannot be loaded,
  * instead of reporting which extract extension implementation fails and the extract reason.
  * </p>
+ * dubbo的SPI机制实现
+ *
+ * SPI机制是底层为上层暴露的扩展机制
+ * 接口是开发规范 对规范的实现可能有很多种
+ * 比如jdbc是一个interface 不同的数据库对其有不同的实现
+ * 所以接口的不同实现是在程序运行过程中动态加载的
+ * 上层需要告诉底层要加载哪一个类
+ * jdk的spi实现是加载META-INF/services/目录下的文件 每一个文件的文件名是接口名 文件的每一行是接口的实现类
+ * 底层通过反射机制加载扩展类并且获得类实例对象
+ *
+ * dubbo实现了一套更加灵活的SPI机制
+ * 比如为扩展类命名 自动依赖注入 通过URL对自适应扩展类的选取
+ * 核心的实现逻辑在ExtensionLoader类
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

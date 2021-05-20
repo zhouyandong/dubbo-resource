@@ -31,6 +31,7 @@ import java.util.stream.IntStream;
 
 /**
  * Code generator for Adaptive class
+ * 动态代码生成器 具体解释见@Adaptive注解
  */
 public class AdaptiveClassCodeGenerator {
 
