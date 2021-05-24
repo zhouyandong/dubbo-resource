@@ -54,6 +54,10 @@ public interface ProxyFactory {
      * @param type
      * @param url
      * @return invoker
+     * 服务被封装成Invoker
+     *  目的是为了屏蔽掉底层的调用细节
+     *  调用方可以直接对服务进行invoke调用而不用关心底层服务到底是什么
+     * Invoker默认是由JavassistProxyFactory生成的
      */
     @Adaptive({PROXY_KEY})
     <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) throws RpcException;

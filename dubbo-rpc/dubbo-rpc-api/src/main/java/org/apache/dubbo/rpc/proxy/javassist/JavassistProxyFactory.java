@@ -38,7 +38,17 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
     @Override
     public <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) {
         // TODO Wrapper cannot handle this scenario correctly: the classname contains '$'
+        /**
+         * 动态编译加载一个封装类 其中封装了实际的服务接口的实现类实例对象
+         * 主要动态生成三个方法
+         *  1.setPropertyValue 为实际封装的对象的某个字段赋值
+         *  2.getPropertyValue 获取实际封装的对象的某个字段值
+         *  3.invokeMethod 调用实际封装的对象的某个方法
+         */
         final Wrapper wrapper = Wrapper.getWrapper(proxy.getClass().getName().indexOf('$') < 0 ? proxy.getClass() : type);
+        /**
+         * 返回服务端Invoker
+         */
         return new AbstractProxyInvoker<T>(proxy, type, url) {
             @Override
             protected Object doInvoke(T proxy, String methodName,

@@ -50,6 +50,7 @@ public abstract class AbstractProtocol implements Protocol {
 
     /**
      * <host:port, ProtocolServer>
+     * address server映射
      */
     protected final Map<String, ProtocolServer> serverMap = new ConcurrentHashMap<>();
 
