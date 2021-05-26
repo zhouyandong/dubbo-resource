@@ -112,7 +112,7 @@ public class ExtensionLoader<T> {
     //默认的扩展类即SPI注解中标注的名字
     private String cachedDefaultName;
     private volatile Throwable createAdaptiveInstanceError;
-
+    //包装类集合
     private Set<Class<?>> cachedWrapperClasses;
 
     private Map<String, IllegalStateException> exceptions = new ConcurrentHashMap<>();
