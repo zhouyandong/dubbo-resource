@@ -109,6 +109,7 @@ public class ExtensionLoader<T> {
     private final Holder<Object> cachedAdaptiveInstance = new Holder<>();
     //Adaptive class对象
     private volatile Class<?> cachedAdaptiveClass = null;
+    //默认的扩展类即SPI注解中标注的名字
     private String cachedDefaultName;
     private volatile Throwable createAdaptiveInstanceError;
 
@@ -665,6 +666,7 @@ public class ExtensionLoader<T> {
             throw findException(name);
         }
         try {
+            //获取扩展类对应的实例
             T instance = (T) EXTENSION_INSTANCES.get(clazz);
             if (instance == null) {
                 EXTENSION_INSTANCES.putIfAbsent(clazz, clazz.getDeclaredConstructor().newInstance());
@@ -675,11 +677,16 @@ public class ExtensionLoader<T> {
 
 
             if (wrap) {
-
+                //wrapper列表
                 List<Class<?>> wrapperClassesList = new ArrayList<>();
                 if (cachedWrapperClasses != null) {
                     wrapperClassesList.addAll(cachedWrapperClasses);
                     wrapperClassesList.sort(WrapperComparator.COMPARATOR);
+                    /**
+                     * 对wrapper列表进行排序 按照activity中的数字 由大到小
+                     * 由此可以对wrapper进行层层封装
+                     * 最终效果是activity小的在最外层最先被调用
+                     */
                     Collections.reverse(wrapperClassesList);
                 }
 

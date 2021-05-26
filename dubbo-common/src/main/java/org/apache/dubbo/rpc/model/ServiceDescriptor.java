@@ -33,9 +33,12 @@ import java.util.Set;
  * We should merge them in the future.
  */
 public class ServiceDescriptor {
+    //接口类的全限定名
     private final String serviceName;
+    //接口类
     private final Class<?> serviceInterfaceClass;
     // to accelerate search
+    //接口方法 key:name value:方法列表
     private final Map<String, List<MethodDescriptor>> methods = new HashMap<>();
     private final Map<String, Map<String, MethodDescriptor>> descToMethods = new HashMap<>();
 

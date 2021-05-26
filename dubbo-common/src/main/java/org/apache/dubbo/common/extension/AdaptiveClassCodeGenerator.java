@@ -94,10 +94,13 @@ public class AdaptiveClassCodeGenerator {
         }
 
         StringBuilder code = new StringBuilder();
+        //package xxx
         code.append(generatePackageInfo());
+        //import xxx
         code.append(generateImports());
+        //类声明
         code.append(generateClassDeclaration());
-
+        //方法体
         Method[] methods = type.getMethods();
         for (Method method : methods) {
             code.append(generateMethod(method));
@@ -159,6 +162,7 @@ public class AdaptiveClassCodeGenerator {
     private String generateMethod(Method method) {
         String methodReturnType = method.getReturnType().getCanonicalName();
         String methodName = method.getName();
+        //方法体生成的主要逻辑
         String methodContent = generateMethodContent(method);
         String methodArgs = generateMethodArguments(method);
         String methodThrows = generateMethodThrows(method);
@@ -201,12 +205,21 @@ public class AdaptiveClassCodeGenerator {
     private String generateMethodContent(Method method) {
         Adaptive adaptiveAnnotation = method.getAnnotation(Adaptive.class);
         StringBuilder code = new StringBuilder(512);
+        //如果方法没有被adaptive注解修饰 则该方法抛异常
         if (adaptiveAnnotation == null) {
             return generateUnsupported(method);
         } else {
+            //获取参数列表中URL对象的索引
             int urlTypeIndex = getUrlTypeIndex(method);
 
             // found parameter in URL type
+            /**
+             * 生成的adaptive代理对象在获取实际对象时通过url中的数据获取实际的对象
+             * 如果参数列表中有URL对象 则直接使用此url
+             * 如果参数列表中没有URL对象 则遍历参数列表 判断参数列表中的对象有没有getUrl方法
+             *  如果没有则抛异常
+             *  如果有则使用此url对象
+             */
             if (urlTypeIndex != -1) {
                 // Null Point check
                 code.append(generateUrlNullCheck(urlTypeIndex));
@@ -220,7 +233,14 @@ public class AdaptiveClassCodeGenerator {
             boolean hasInvocation = hasInvocationArgument(method);
 
             code.append(generateInvocationArgumentNullCheck(method));
-
+            /**
+             * adaptive代理对象在获取真正对象时会获取对象名 也就是spi文件中aaa=xxx.xxx.xxx的aaa
+             * aaa的获取默认是从url的protocol字段获取
+             * 用户可以自定义 只要在adaptive注解中写入参数名即可
+             * 如@Adaptive({proxy})
+             *  则会从url对象的Map<String, String> parameters中获取proxy的值
+             *  如果proxy为空 则默认使用接口上SPI("XX")中的XX
+             */
             code.append(generateExtNameAssignment(value, hasInvocation));
             // check extName == null?
             code.append(generateExtNameNullCheck(value));

@@ -183,7 +183,7 @@ public class ConfigValidationUtils {
         List<URL> registryList = new ArrayList<URL>();
         //application dubbo-demo-api-provider
         ApplicationConfig application = interfaceConfig.getApplication();
-        //注册中心配置   zookeeper://127.0.0.1:2181
+        //注册中心配置   协议+ip+端口 例：zookeeper://127.0.0.1:2181
         List<RegistryConfig> registries = interfaceConfig.getRegistries();
         if (CollectionUtils.isNotEmpty(registries)) {
             for (RegistryConfig config : registries) {
@@ -217,6 +217,7 @@ public class ConfigValidationUtils {
                 }
             }
         }
+        //返回注册中心url
         return genCompatibleRegistries(registryList, provider);
     }
 
