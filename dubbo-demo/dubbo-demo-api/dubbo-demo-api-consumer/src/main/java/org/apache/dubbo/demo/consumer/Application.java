@@ -24,13 +24,17 @@ import org.apache.dubbo.config.utils.ReferenceConfigCache;
 import org.apache.dubbo.demo.DemoService;
 import org.apache.dubbo.rpc.service.GenericService;
 
+import java.util.concurrent.CompletableFuture;
+
 public class Application {
     public static void main(String[] args) {
-        if (isClassic(args)) {
-            runWithRefer();
-        } else {
-            runWithBootstrap();
-        }
+//        if (isClassic(args)) {
+//            runWithRefer();
+//        } else {
+//            runWithBootstrap();
+//        }
+        //runWithRefer();
+        runWithReferAsy();
     }
 
     private static boolean isClassic(String[] args) {
@@ -66,6 +70,16 @@ public class Application {
         reference.setInterface(DemoService.class);
         DemoService service = reference.get();
         String message = service.sayHello("dubbo");
-        System.out.println(message);
+        System.out.println("message : " + message);
+    }
+
+    private static void runWithReferAsy() {
+        ReferenceConfig<DemoService> reference = new ReferenceConfig<>();
+        reference.setApplication(new ApplicationConfig("dubbo-demo-api-consumer"));
+        reference.setRegistry(new RegistryConfig("zookeeper://127.0.0.1:2181"));
+        reference.setInterface(DemoService.class);
+        DemoService service = reference.get();
+        CompletableFuture<String> message = service.sayHelloAsync("dubbo");
+        System.out.println("message : " + message);
     }
 }

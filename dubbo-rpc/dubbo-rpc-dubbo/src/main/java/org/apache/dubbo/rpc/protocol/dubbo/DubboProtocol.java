@@ -88,6 +88,7 @@ import static org.apache.dubbo.rpc.protocol.dubbo.Constants.SHARE_CONNECTIONS_KE
 
 /**
  * dubbo protocol support.
+ * 根据dubbo协议 对服务接口进行暴露
  */
 public class DubboProtocol extends AbstractProtocol {
 
@@ -291,7 +292,7 @@ public class DubboProtocol extends AbstractProtocol {
         URL url = invoker.getUrl();
 
         // export service.
-        //服务接口+版本+端口
+        //服务接口+端口 org.apache.xxx.DemoService:20880
         String key = serviceKey(url);
         DubboExporter<T> exporter = new DubboExporter<T>(invoker, key, exporterMap);
         exporterMap.put(key, exporter);
@@ -316,8 +317,12 @@ public class DubboProtocol extends AbstractProtocol {
         return exporter;
     }
 
+    /**
+     * 服务接口对应的服务器
+     * @param url
+     */
     private void openServer(URL url) {
-        // find server.
+        // find server. ip:port
         String key = url.getAddress();
         //client can export a service which's only for server to invoke
         boolean isServer = url.getParameter(IS_SERVER_KEY, true);
