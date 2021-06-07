@@ -53,6 +53,10 @@ public class StubProxyFactoryWrapper implements ProxyFactory {
 
     private Protocol protocol;
 
+    /**
+     * ProxyFactory的包装类
+     * @param proxyFactory
+     */
     public StubProxyFactoryWrapper(ProxyFactory proxyFactory) {
         this.proxyFactory = proxyFactory;
     }

@@ -52,6 +52,15 @@ import static org.apache.dubbo.common.constants.CommonConstants.SSL_ENABLED_KEY;
 
 /**
  * NettyServer.
+ * 基于netty实现的服务器
+ * 底层网络传输封装在netty框架中
+ * netty组件
+ *  bootstrap:引导类
+ *  channel:封装了socket 每个socket都被封装了一个channel
+ *          channel被绑定到了channelPipeline上 每个channelPipeline关联了一组channelHandler
+ *          实现channelHandler接口并且安装到channelPipeline中即可实现网络触发事件时的业务逻辑
+ *  bossGroup:负责建立连接的线程组
+ *  workerGroup:工作线程组
  */
 public class NettyServer extends AbstractServer implements RemotingServer {
 
@@ -67,6 +76,7 @@ public class NettyServer extends AbstractServer implements RemotingServer {
     private ServerBootstrap bootstrap;
     /**
      * the boss channel that receive connections and dispatch these to worker channel.
+     * 监听端口的socket
      */
 	private io.netty.channel.Channel channel;
 
@@ -92,7 +102,13 @@ public class NettyServer extends AbstractServer implements RemotingServer {
         workerGroup = NettyEventLoopFactory.eventLoopGroup(
                 getUrl().getPositiveParameter(IO_THREADS_KEY, Constants.DEFAULT_IO_THREADS),
                 "NettyServerWorker");
-
+        /**
+         * 实现了netty的channelHandler接口 入参为nettyServer对象
+         * nettyServer本身实现了channelHandler接口 其基类AbstractPeer封装了对实际channelHandler的调用
+         * 实际会调用构造方法中传入的被ChannelHandlers封装的ChannelHandler对象
+         * 最终构造的handler链为:
+         *  MultiMessageHandler->HeartbeatHandler
+         */
         final NettyServerHandler nettyServerHandler = new NettyServerHandler(getUrl(), this);
         channels = nettyServerHandler.getChannels();
 

@@ -106,6 +106,9 @@ public class DubboProtocol extends AbstractProtocol {
     private static final Object PENDING_OBJECT = new Object();
     private final Set<String> optimizers = new ConcurrentHashSet<>();
 
+    /**
+     *
+     */
     private ExchangeHandler requestHandler = new ExchangeHandlerAdapter() {
 
         @Override
