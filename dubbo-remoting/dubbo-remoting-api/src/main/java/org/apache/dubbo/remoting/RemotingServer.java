@@ -26,6 +26,7 @@ import java.util.Collection;
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Client%E2%80%93server_model">Client/Server</a>
  *
+ * 实际启动的server
  * @see org.apache.dubbo.remoting.Transporter#bind(org.apache.dubbo.common.URL, ChannelHandler)
  */
 public interface RemotingServer extends Endpoint, Resetable, IdleSensible {

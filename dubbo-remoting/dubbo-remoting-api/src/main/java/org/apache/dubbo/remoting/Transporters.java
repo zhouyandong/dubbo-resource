@@ -24,6 +24,10 @@ import org.apache.dubbo.remoting.transport.ChannelHandlerDispatcher;
 
 /**
  * Transporter facade. (API, Static, ThreadSafe)
+ *
+ * Transporter的门面类
+ * 为外部调用方提供了两个统一的方法bind和connect
+ * 方法内部通过入参url获取对应的由spi机制注入的Transporter 实际调用此Transporter的bind和connect方法
  */
 public class Transporters {
 
@@ -53,7 +57,11 @@ public class Transporters {
         } else {
             handler = new ChannelHandlerDispatcher(handlers);
         }
-        //默认选择NettyTransporter 返回一个NettyServer
+        /**
+         * 获取Transporter的代理对象
+         * 通过代理对象的入参url获取实际的Transporter对象
+         * 默认使用NettyTransporter 返回一个NettyServer
+         */
         return getTransporter().bind(url, handler);
     }
 
@@ -76,6 +84,10 @@ public class Transporters {
         return getTransporter().connect(url, handler);
     }
 
+    /**
+     * 返回通过spi注入的Transporter实例对象
+     * @return
+     */
     public static Transporter getTransporter() {
         return ExtensionLoader.getExtensionLoader(Transporter.class).getAdaptiveExtension();
     }

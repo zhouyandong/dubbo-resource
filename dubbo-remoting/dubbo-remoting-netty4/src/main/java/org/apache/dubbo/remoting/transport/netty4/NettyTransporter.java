@@ -25,6 +25,8 @@ import org.apache.dubbo.remoting.Transporter;
 
 /**
  * Default extension of {@link Transporter} using netty4.x.
+ * 基于netty实现的网络传输层
+ * 返回以基于netty实现的client和server
  */
 public class NettyTransporter implements Transporter {
 

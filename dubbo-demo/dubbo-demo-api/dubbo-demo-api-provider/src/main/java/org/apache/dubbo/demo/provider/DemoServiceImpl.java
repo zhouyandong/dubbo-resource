@@ -33,9 +33,23 @@ public class DemoServiceImpl implements DemoService {
         return "Hello " + name + ", response from provider: " + RpcContext.getContext().getLocalAddress();
     }
 
+    /**
+     * 将阻塞的业务从dubbo线程池切换到自定义线程池 避免对dubbo线程池的阻塞
+     * 对资源节省和性能提升没有影响
+     * @param name
+     * @return
+     */
     @Override
     public CompletableFuture<String> sayHelloAsync(String name) {
-        return null;
+        CompletableFuture<String> cf = CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "hello " + name;
+        });
+        return cf;
     }
 
 }

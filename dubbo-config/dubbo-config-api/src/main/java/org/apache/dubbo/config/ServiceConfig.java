@@ -565,7 +565,8 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
          * ProxyFactory返回一个封装好的Invoker实例对象
          * Protocol的export方法是自适应方法 invoker内部的URL为injvm
          * 所以此次调用实际会调用InjvmProtocol的export方法
-         * 返回一个InjvmExporter
+         * Protocol本身实现了aop机制 其有两个封装类ProtocolFilterWrapper 和 ProtocolListenerWrapper
+         * 最终返回了一个ListenerExporterWrapper实例对象
          */
         Exporter<?> exporter = PROTOCOL.export(
                 PROXY_FACTORY.getInvoker(ref, (Class) interfaceClass, local));

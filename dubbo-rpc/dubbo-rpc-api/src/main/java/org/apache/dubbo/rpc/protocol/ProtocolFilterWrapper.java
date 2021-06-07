@@ -35,6 +35,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.SERVICE_FILTER_K
 
 /**
  * ListenerProtocol
+ * Protocol接口的封装类
  */
 @Activate(order = 100)
 public class ProtocolFilterWrapper implements Protocol {
@@ -48,6 +49,18 @@ public class ProtocolFilterWrapper implements Protocol {
         this.protocol = protocol;
     }
 
+    /**
+     * 构建invoker调用链
+     * invoker调用链是由实现Invoker接口的FilterNode组成的
+     * FilterNode中存储了当前Node所对应的Filter和下一个FilterNode
+     *
+     * Filter是通过spi的activate注解加载的
+     * @param invoker
+     * @param key
+     * @param group
+     * @param <T>
+     * @return
+     */
     private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
         Invoker<T> last = invoker;
         List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
