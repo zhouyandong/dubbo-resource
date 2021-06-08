@@ -45,11 +45,16 @@ public abstract class AbstractServer extends AbstractEndpoint implements Remotin
 
     protected static final String SERVER_THREAD_POOL_NAME = "DubboServerHandler";
     private static final Logger logger = LoggerFactory.getLogger(AbstractServer.class);
+    /**
+     * dubbo工作线程池
+     */
     ExecutorService executor;
     private InetSocketAddress localAddress;
     private InetSocketAddress bindAddress;
     private int accepts;
-
+    /**
+     * dubbo工作线程池仓库
+     */
     private ExecutorRepository executorRepository = ExtensionLoader.getExtensionLoader(ExecutorRepository.class).getDefaultExtension();//DefaultExecutorRepository
 
     public AbstractServer(URL url, ChannelHandler handler) throws RemotingException {

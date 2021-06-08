@@ -107,7 +107,8 @@ public class NettyServer extends AbstractServer implements RemotingServer {
          * nettyServer本身实现了channelHandler接口 其基类AbstractPeer封装了对实际channelHandler的调用
          * 实际会调用构造方法中传入的被ChannelHandlers封装的ChannelHandler对象
          * 最终构造的handler链为:
-         *  MultiMessageHandler->HeartbeatHandler
+         *  MultiMessageHandler->HeartbeatHandler->AllChannelHandler->
+         *  DecodeHandler->HeaderExchangeHandler->DubboProtocol内部的ExchangeHandler
          */
         final NettyServerHandler nettyServerHandler = new NettyServerHandler(getUrl(), this);
         channels = nettyServerHandler.getChannels();

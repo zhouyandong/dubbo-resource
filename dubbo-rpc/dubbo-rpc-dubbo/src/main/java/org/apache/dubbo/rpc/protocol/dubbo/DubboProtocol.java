@@ -121,6 +121,18 @@ public class DubboProtocol extends AbstractProtocol {
             }
 
             Invocation inv = (Invocation) message;
+            /**
+             * 根据请求参数获取存储在exportMap中的exporter
+             * 并且获取封装在exporter内的invoker
+             * invoker在构造时实际被FilterNode封装过 实际是FilterNode调用链
+             * 每一个FilterNode中存储了三个字段:
+             *  1.实际动态生成的invoker
+             *  2.下一个FilterNode对象
+             *  3.Filter对象 实际处理逻辑
+             * Filter的封装顺序是由spi机制的activate注解实现的
+             * ContextFilter->EchoFilter->ClassLoaderFilter->GenericFilter->TraceFilter->
+             * TimeoutFilter->MonitorFilter->ExceptionFilter->实际的invoker
+             */
             Invoker<?> invoker = getInvoker(channel, inv);
             // need to consider backward-compatibility if it's a callback
             if (Boolean.TRUE.toString().equals(inv.getObjectAttachments().get(IS_CALLBACK_SERVICE_INVOKE))) {
@@ -145,7 +157,14 @@ public class DubboProtocol extends AbstractProtocol {
                     return null;
                 }
             }
+            /**
+             * threadLocal上下文
+             */
             RpcContext.getContext().setRemoteAddress(channel.getRemoteAddress());
+            /**
+             * invoker调用
+             * 最终结果返回到Result接口的实例中
+             */
             Result result = invoker.invoke(inv);
             return result.thenApply(Function.identity());
         }

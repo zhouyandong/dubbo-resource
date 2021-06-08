@@ -50,6 +50,8 @@ import static org.apache.dubbo.rpc.Constants.INPUT_KEY;
 import static org.apache.dubbo.rpc.Constants.OUTPUT_KEY;
 /**
  * MonitorFilter. (SPI, Singleton, ThreadSafe)
+ * 监控
+ * 应该可以在其中实现一些限流等功能
  */
 @Activate(group = {PROVIDER, CONSUMER})
 public class MonitorFilter implements Filter, Filter.Listener {

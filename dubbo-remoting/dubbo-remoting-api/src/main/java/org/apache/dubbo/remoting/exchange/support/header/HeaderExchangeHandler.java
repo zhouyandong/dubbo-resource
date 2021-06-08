@@ -41,6 +41,9 @@ import static org.apache.dubbo.common.constants.CommonConstants.READONLY_EVENT;
 
 /**
  * ExchangeReceiver
+ * 请求被反序列化之后传递到此handler
+ * 调用协议层如dubbo的handler处理请求并获取response
+ * 将response传递回网络层
  */
 public class HeaderExchangeHandler implements ChannelHandlerDelegate {
 
@@ -107,6 +110,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                         res.setStatus(Response.SERVICE_ERROR);
                         res.setErrorMessage(StringUtils.toString(t));
                     }
+                    System.out.println("send response : " + Thread.currentThread());
                     channel.send(res);
                 } catch (RemotingException e) {
                     logger.warn("Send result to consumer failed, channel is " + channel + ", msg is " + e);
@@ -117,6 +121,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
             res.setErrorMessage(StringUtils.toString(e));
             channel.send(res);
         }
+        System.out.println("done request : " + Thread.currentThread());
     }
 
     @Override

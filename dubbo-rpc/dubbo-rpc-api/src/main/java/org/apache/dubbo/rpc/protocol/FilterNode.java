@@ -27,6 +27,9 @@ import org.apache.dubbo.rpc.RpcException;
 /**
  * @see org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper
  *
+ * Filter的包装类
+ * FilterNode将Filter包装成调用链 每一个FilterNode持有其下一个FilterNode的引用
+ * 调用链的顺序由SPI机制的activate注解实现 在接口暴露的时候由ProtocolFilterWrapper包装得到
  */
 class FilterNode<T> implements Invoker<T>{
     private final Invoker<T> invoker;
@@ -57,9 +60,16 @@ class FilterNode<T> implements Invoker<T>{
     @Override
     public Result invoke(Invocation invocation) throws RpcException {
         Result asyncResult;
+        /**
+         * FilterNode链并不一定会全部走完
+         * 是否调用下一个Node在filter中通过逻辑控制
+         */
         try {
             asyncResult = filter.invoke(next, invocation);
         } catch (Exception e) {
+            /**
+             * 调用过程中发生异常 则注册到result中
+             */
             if (filter instanceof ListenableFilter) {
                 ListenableFilter listenableFilter = ((ListenableFilter) filter);
                 try {
@@ -78,6 +88,10 @@ class FilterNode<T> implements Invoker<T>{
         } finally {
 
         }
+        /**
+         * 支持provider端的异步处理
+         *
+         */
         return asyncResult.whenCompleteWithContext((r, t) -> {
             if (filter instanceof ListenableFilter) {
                 ListenableFilter listenableFilter = ((ListenableFilter) filter);

@@ -39,6 +39,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.THREADS_KEY;
 
 /**
  * Consider implementing {@code Licycle} to enable executors shutdown when the process stops.
+ * dubbo默认的工作线程池
  */
 public class DefaultExecutorRepository implements ExecutorRepository {
     private static final Logger logger = LoggerFactory.getLogger(DefaultExecutorRepository.class);

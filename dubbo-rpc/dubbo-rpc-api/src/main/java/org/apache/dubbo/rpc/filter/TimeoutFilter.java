@@ -35,6 +35,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.TIME_COUNTDOWN_K
 
 /**
  * Log any invocation timeout, but don't stop server from running
+ * 判断业务逻辑的处理是否超时
  */
 @Activate(group = CommonConstants.PROVIDER)
 public class TimeoutFilter implements Filter, Filter.Listener {

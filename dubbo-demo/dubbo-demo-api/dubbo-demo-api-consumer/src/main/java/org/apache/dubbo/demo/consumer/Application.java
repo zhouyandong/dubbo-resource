@@ -33,8 +33,8 @@ public class Application {
 //        } else {
 //            runWithBootstrap();
 //        }
-        //runWithRefer();
-        runWithReferAsy();
+        runWithRefer();
+        //runWithReferAsy();
     }
 
     private static boolean isClassic(String[] args) {

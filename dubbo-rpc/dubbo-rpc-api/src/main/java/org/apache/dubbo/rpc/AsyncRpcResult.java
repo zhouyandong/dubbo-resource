@@ -193,6 +193,7 @@ public class AsyncRpcResult implements Result {
 
     public Result whenCompleteWithContext(BiConsumer<Result, Throwable> fn) {
         this.responseFuture = this.responseFuture.whenComplete((v, t) -> {
+            System.out.println("when complete with context : " + Thread.currentThread());
             beforeContext.accept(v, t);
             fn.accept(v, t);
             afterContext.accept(v, t);
