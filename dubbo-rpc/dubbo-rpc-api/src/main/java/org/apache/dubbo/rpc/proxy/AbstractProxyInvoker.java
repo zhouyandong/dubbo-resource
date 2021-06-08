@@ -81,6 +81,18 @@ public abstract class AbstractProxyInvoker<T> implements Invoker<T> {
     @Override
     public Result invoke(Invocation invocation) throws RpcException {
         try {
+            /**
+             * 实际对invoker进行调用的方法
+             * invoker内部可以是同步调用 也可以是异步调用
+             *  当invoker内部是同步调用时
+             *      dubbo线程负责对invoker内部的业务逻辑进行调用
+             *      将返回的结果封装为已经complete的CompletableFuture 当前线程会负责返回结果的注入 以及结果的发送
+             *  当invoker内部是异步调用时
+             *      invoker内部会将业务逻辑提交给其自定义的线程池并返回一个CompletableFuture dubbo线程直接返回
+             *      当invoker业务逻辑被自定义线程池中的线程执行完时 此线程会负责结果的注入以及发送
+             * 异步调用对性能和吞吐量没有提升 唯一的优点是不会因为业务线程阻塞dubbo的工作线程
+             * 降低了对其他依赖dubbo工作线程的应用的影响
+             */
             Object value = doInvoke(proxy, invocation.getMethodName(), invocation.getParameterTypes(), invocation.getArguments());
             CompletableFuture<Object> future = wrapWithFuture(value);
             CompletableFuture<AppResponse> appResponseFuture = future.handle((obj, t) -> {
