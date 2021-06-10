@@ -47,12 +47,18 @@ public abstract class AbstractProtocol implements Protocol {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     /**
      * <接口名:port,Exporter>
+     * Exporter中封装了实际暴露的接口invoker
+     * 服务器通过请求中的url获取接口名 将接口名拼装上自身监听端口获取对应的exporter进行服务调用
      */
     protected final Map<String, Exporter<?>> exporterMap = new ConcurrentHashMap<String, Exporter<?>>();
 
     /**
      * <host:port, ProtocolServer>
-     * address server映射
+     * 服务器列表
+     * ProtocolServer中封装了RemotingServer
+     * RemotingServer是实际的网络层服务器实现 如netty tomcat等
+     * 对于一个协议如dubbo 可以启动多个server(DubboProtocolServer) 只要<host,port>二元组不重复
+     * 每一个ProtocolServer最多只能持有一个RemotingServer 因为其只能对应唯一一个端口
      */
     protected final Map<String, ProtocolServer> serverMap = new ConcurrentHashMap<>();
 

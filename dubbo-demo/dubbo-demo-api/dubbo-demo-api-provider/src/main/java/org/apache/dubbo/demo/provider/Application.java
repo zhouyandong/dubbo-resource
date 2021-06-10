@@ -17,10 +17,12 @@
 package org.apache.dubbo.demo.provider;
 
 import org.apache.dubbo.config.ApplicationConfig;
+import org.apache.dubbo.config.ProtocolConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.ServiceConfig;
 import org.apache.dubbo.config.bootstrap.DubboBootstrap;
 import org.apache.dubbo.demo.DemoService;
+import org.apache.dubbo.demo.DongService;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -58,6 +60,14 @@ public class Application {
         service.setApplication(new ApplicationConfig("dubbo-demo-api-provider"));
         service.setRegistry(new RegistryConfig("zookeeper://127.0.0.1:2181"));
         service.export();
+
+        ServiceConfig<DemoServiceDong> serviceDong = new ServiceConfig<>();
+        serviceDong.setInterface(DongService.class);
+        serviceDong.setRef(new DemoServiceDong());
+        serviceDong.setApplication(new ApplicationConfig("dubbo-demo-api-provider"));
+        serviceDong.setProtocol(new ProtocolConfig("dubbo", 16888));
+        serviceDong.setRegistry(new RegistryConfig("zookeeper://127.0.0.1:2181"));
+        serviceDong.export();
 
         System.out.println("dubbo service started");
         new CountDownLatch(1).await();
