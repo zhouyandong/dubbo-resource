@@ -80,6 +80,7 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
 
     // Map<url, Invoker> cache service url to invoker mapping.
     // The initial value is null and the midway may be assigned to null, please use the local variable reference
+    // 存储了url->invoker的映射
     protected volatile Map<URL, Invoker<T>> urlInvokerMap;
     // The initial value is null and the midway may be assigned to null, please use the local variable reference
     protected volatile Set<URL> cachedInvokerUrls;
@@ -104,6 +105,12 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
         registry.unsubscribe(url, this);
     }
 
+    /**
+     * 当注册中心数据发生变更时 此接口被回调
+     * 监听/dubbo/[接口]/configurators+providers+routers节点下的数据
+     * 获取最新的数据并更新
+     * @param urls The list of registered information , is always not empty. The meaning is the same as the return value of {@link org.apache.dubbo.registry.RegistryService#lookup(URL)}.
+     */
     @Override
     public synchronized void notify(List<URL> urls) {
         Map<String, List<URL>> categoryUrls = urls.stream()
@@ -130,6 +137,7 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
                 providerURLs = addressListener.notify(providerURLs, getConsumerUrl(),this);
             }
         }
+        //更新invoker列表
         refreshOverrideAndInvoker(providerURLs);
     }
 
@@ -203,14 +211,14 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
                         .toString()));
                 return;
             }
-
+            //使用新的map替换旧的map
             List<Invoker<T>> newInvokers = Collections.unmodifiableList(new ArrayList<>(newUrlInvokerMap.values()));
             // pre-route and build cache, notice that route cache should build on original Invoker list.
             // toMergeMethodInvokerMap() will wrap some invokers having different groups, those wrapped invokers not should be routed.
             routerChain.setInvokers(newInvokers);
             this.invokers = multiGroup ? toMergeInvokerList(newInvokers) : newInvokers;
             this.urlInvokerMap = newUrlInvokerMap;
-
+            //旧的map中存在 新的map中不存在的invoker会被移除 通过调用invoker的destroy方法
             try {
                 destroyUnusedInvokers(oldUrlInvokerMap, newUrlInvokerMap); // Close the unused Invoker
             } catch (Exception e) {
@@ -219,6 +227,7 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
         }
 
         // notify invokers refreshed
+        // 释放invoker变更信号
         this.invokersChanged();
     }
 
@@ -322,6 +331,12 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
             }
             keys.add(url);
             // Cache key is url that does not merge with consumer side parameters, regardless of how the consumer combines parameters, if the server url changes, then refer again
+            /**
+             * 从缓存中获取当前url对应的invoker
+             * 如果可以获取到则直接获取并存储
+             * 如果获取不到则通过protocol实例进行创建并且封装然后存储
+             * 最终返回一个新的url->invoker的映射
+             */
             Map<URL, Invoker<T>> localUrlInvokerMap = this.urlInvokerMap; // local reference
             Invoker<T> invoker = localUrlInvokerMap == null ? null : localUrlInvokerMap.get(url);
             if (invoker == null) { // Not in the cache, refer again
@@ -333,6 +348,9 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
                         enabled = url.getParameter(ENABLED_KEY, true);
                     }
                     if (enabled) {
+                        /**
+                         *
+                         */
                         invoker = new InvokerDelegate<>(protocol.refer(serviceType, url), url, providerUrl);
                     }
                 } catch (Throwable t) {

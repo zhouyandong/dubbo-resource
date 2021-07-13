@@ -79,6 +79,14 @@ public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildLis
                 return;
             }
         }
+        /**
+         * path为zookeeper的注册节点
+         * 根据"/"由后向前获取节点
+         * /dubbo/org.apache.dubbo.demo.DemoService/providers/dubbo%3A%2F%2F192.168.0.7%3A20880%2Forg.apache.dubbo.demo.DemoService%3Fanyhost%3Dtrue%26application%3Ddubbo-demo-api-provider%26default%3Dtrue%26deprecated%3Dfalse%26dubbo%3D2.0.2%26dynamic%3Dtrue%26generic%3Dfalse%26interface%3Dorg.apache.dubbo.demo.DemoService%26methods%3DsayHello%2CsayHelloAsync%26pid%3D11985%26release%3D%26service.name%3DServiceBean%3A%2Forg.apache.dubbo.demo.DemoService%26side%3Dprovider%26timestamp%3D1623588691473
+         * 递归创建zookeeper节点
+         * /dubbo/org.xxx/providers/为永久节点
+         * /dubbo%xxx为临时节点 当当前服务节点下线时 临时节点会自动被删除
+         */
         int i = path.lastIndexOf('/');
         if (i > 0) {
             create(path.substring(0, i), false);

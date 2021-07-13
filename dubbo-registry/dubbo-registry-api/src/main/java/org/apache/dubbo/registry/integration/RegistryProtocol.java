@@ -222,12 +222,14 @@ public class RegistryProtocol implements Protocol {
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker, providerUrl);
 
         // url to registry
+        // 封装了一组对注册中心的操作
         final Registry registry = getRegistry(originInvoker);
         final URL registeredProviderUrl = getUrlToRegistry(providerUrl, registryUrl);
 
         // decide if we need to delay publish
         boolean register = providerUrl.getParameter(REGISTER_KEY, true);
         if (register) {
+            // 向注册中心注册当前服务节点
             registry.register(registeredProviderUrl);
         }
 
@@ -491,6 +493,13 @@ public class RegistryProtocol implements Protocol {
             }
         }
 
+        /**
+         * 将provider封装成为集群Cluster
+         * Cluster提供了管理providers的功能 包括路由 负载均衡等
+         * Cluster接口的不同实现类实现了不同的管理策略
+         * 默认返回failover cluster
+         * 然后用MockClusterWrapper封装一层
+         */
         Cluster cluster = Cluster.getCluster(qs.get(CLUSTER_KEY));
         return doRefer(cluster, registry, type, url, qs);
     }

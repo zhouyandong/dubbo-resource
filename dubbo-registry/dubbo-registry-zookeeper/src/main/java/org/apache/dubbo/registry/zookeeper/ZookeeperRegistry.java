@@ -78,8 +78,11 @@ public class ZookeeperRegistry extends FailbackRegistry {
         if (!group.startsWith(PATH_SEPARATOR)) {
             group = PATH_SEPARATOR + group;
         }
+        //获取注册到zk上的根节点
         this.root = group;
+        //创建zk客户端 默认返回CuratorZookeeperClient
         zkClient = zookeeperTransporter.connect(url);
+        //对根节点状态进行监听 根节点存储全部的provider的地址
         zkClient.addStateListener((state) -> {
             if (state == StateListener.RECONNECTED) {
                 logger.warn("Trying to fetch the latest urls, in case there're provider changes during connection loss.\n" +

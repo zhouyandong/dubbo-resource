@@ -31,6 +31,8 @@ public class ZookeeperRegistryFactory extends AbstractRegistryFactory {
 
     /**
      * Invisible injection of zookeeper client via IOC/SPI
+     * ZookeeperRegistryFactory被SPI机制创建时
+     * ZookeeperTransporter被注入 注入的对象为自适应代理类ZookeeperTransporter$Adaptive实例
      * @param zookeeperTransporter
      */
     public void setZookeeperTransporter(ZookeeperTransporter zookeeperTransporter) {

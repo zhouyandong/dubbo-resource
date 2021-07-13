@@ -110,6 +110,7 @@ public class MigrationInvoker<T> implements MigrationClusterInvoker<T> {
     public synchronized void migrateToServiceDiscoveryInvoker(boolean forceMigrate) {
         if (!forceMigrate) {
             refreshServiceDiscoveryInvoker();
+            //刷新封装接口的invoker
             refreshInterfaceInvoker();
             setListener(invoker, () -> {
                 this.compareAddresses(serviceDiscoveryInvoker, invoker);

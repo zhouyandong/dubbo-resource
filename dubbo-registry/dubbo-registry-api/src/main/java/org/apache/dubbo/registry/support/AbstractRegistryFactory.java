@@ -151,6 +151,10 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
                 return registry;
             }
             //create registry by spi/ioc
+            /**
+             * registry中封装了对注册中心的操作句柄
+             * 以zookeeper为例 其中封装了监听的zk根节点 zkClient 监视器等
+             */
             registry = createRegistry(url);
             if (registry == null) {
                 throw new IllegalStateException("Can not create registry " + url);

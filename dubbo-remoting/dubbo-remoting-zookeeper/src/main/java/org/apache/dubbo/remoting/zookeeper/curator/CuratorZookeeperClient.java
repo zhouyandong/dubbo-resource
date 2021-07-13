@@ -50,6 +50,10 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.dubbo.common.constants.CommonConstants.TIMEOUT_KEY;
 
+/**
+ * CuratorZookeeper框架
+ * 封装了对zookeeper的操作 包括对基础节点的操作 监听 对集群的连接重试等功能
+ */
 public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZookeeperClient.NodeCacheListenerImpl, CuratorZookeeperClient.CuratorWatcherImpl> {
 
     protected static final Logger logger = LoggerFactory.getLogger(CuratorZookeeperClient.class);
@@ -74,6 +78,10 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorZooke
                 builder = builder.authorization("digest", authority.getBytes());
             }
             client = builder.build();
+            /**
+             * 添加一个listener
+             * 监听和zk的连接情况 当和zk连接发生变化时 listener
+             */
             client.getConnectionStateListenable().addListener(new CuratorConnectionStateListener(url));
             client.start();
             boolean connected = client.blockUntilConnected(timeout, TimeUnit.MILLISECONDS);
