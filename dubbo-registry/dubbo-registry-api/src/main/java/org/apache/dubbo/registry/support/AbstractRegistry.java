@@ -411,6 +411,7 @@ public abstract class AbstractRegistry implements Registry {
             logger.info("Notify urls for subscribe url " + url + ", urls: " + urls);
         }
         // keep every provider's category.
+        // 注册中心的数据被存储到urls中 处理数据写入到result中
         Map<String, List<URL>> result = new HashMap<>();
         for (URL u : urls) {
             if (UrlUtils.isMatch(url, u)) {
@@ -423,6 +424,13 @@ public abstract class AbstractRegistry implements Registry {
             return;
         }
         Map<String, List<URL>> categoryNotified = notified.computeIfAbsent(url, u -> new ConcurrentHashMap<>());
+        /**
+         * result中存储了注册中心节点数据 其中包括三部分数据
+         * routers->[/{root}/{接口名}/routers下数据]
+         * configurators->[/{root}/{接口名}/configurators下数据]
+         * providers->[/{root}/{接口名}/providers下数据]
+         * 然后将数据作为入参传输到directory的notify方法中进行providers列表的构造
+         */
         for (Map.Entry<String, List<URL>> entry : result.entrySet()) {
             String category = entry.getKey();
             List<URL> categoryList = entry.getValue();

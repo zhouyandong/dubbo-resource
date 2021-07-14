@@ -63,7 +63,14 @@ public class InterfaceCompatibleRegistryProtocol extends RegistryProtocol {
 
     @Override
     public <T> ClusterInvoker<T> getInvoker(Cluster cluster, Registry registry, Class<T> type, URL url) {
-        //providers列表 封装了注册中心功能
+        /**
+         * Directory保存了当前协议当前接口注册于注册中心中的所有providers
+         * 并且其内部维护了路由逻辑 可以通过路由规则获取对应的providers
+         * DynamicDirectory同时实现了NotifyListener接口
+         * 可以将其注册到registry(默认是ZookeeperRegistry 外层包装了一层ListenerRegistryWrapper)中
+         * 当注册中心发生变更时 registry会接收到变更 然后会回调directory的notify方法
+         * notify方法中实现了对providers列表的维护逻辑
+         */
         DynamicDirectory<T> directory = new RegistryDirectory<>(type, url);
         return doCreateInvoker(directory, cluster, registry, type);
     }

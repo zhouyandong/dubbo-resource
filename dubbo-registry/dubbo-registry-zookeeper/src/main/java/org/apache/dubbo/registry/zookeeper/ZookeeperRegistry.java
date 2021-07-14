@@ -169,6 +169,10 @@ public class ZookeeperRegistry extends FailbackRegistry {
             } else {
                 CountDownLatch latch = new CountDownLatch(1);
                 List<URL> urls = new ArrayList<>();
+                /**
+                 * 获取/dubbo/[接口]/providers+configurators+routers下的数据
+                 * 加入到urls列表中
+                 */
                 for (String path : toCategoriesPath(url)) {
                     ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.computeIfAbsent(url, k -> new ConcurrentHashMap<>());
                     ChildListener zkListener = listeners.computeIfAbsent(listener, k -> new RegistryChildListenerImpl(url, k, latch));
@@ -181,6 +185,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                         urls.addAll(toUrlsWithEmpty(url, path, children));
                     }
                 }
+                //回调listener的notify逻辑 也即是回调传入的directory对象的notify方法以构造providers列表
                 notify(url, listener, urls);
                 // tells the listener to run only after the sync notification of main thread finishes.
                 latch.countDown();

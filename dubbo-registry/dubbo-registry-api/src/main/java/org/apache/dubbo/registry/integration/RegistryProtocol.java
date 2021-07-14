@@ -479,6 +479,10 @@ public class RegistryProtocol implements Protocol {
     @SuppressWarnings("unchecked")
     public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
         url = getRegistryUrl(url);
+        /**
+         * 操作注册中心的句柄 封装了对注册中心的操作
+         * 默认是ZookeeperRegistry 外面封装了 一层ListenerRegistryWrapper
+         */
         Registry registry = getRegistry(url);
         if (RegistryService.class.equals(type)) {
             return proxyFactory.getInvoker((T) registry, type, url);
@@ -495,17 +499,21 @@ public class RegistryProtocol implements Protocol {
 
         /**
          * 将provider封装成为集群Cluster
-         * Cluster提供了管理providers的功能 包括路由 负载均衡等
-         * Cluster接口的不同实现类实现了不同的管理策略
+         * Cluster是通过spi机制获取的实例 其内部不持有任何状态 只封装了对集群的管理策略
          * 默认返回failover cluster
          * 然后用MockClusterWrapper封装一层
          */
         Cluster cluster = Cluster.getCluster(qs.get(CLUSTER_KEY));
+        //将cluster、registry以及一些上下文信息作为入参 返回一个invoker执行体
         return doRefer(cluster, registry, type, url, qs);
     }
 
     protected <T> Invoker<T> doRefer(Cluster cluster, Registry registry, Class<T> type, URL url, Map<String, String> parameters) {
         URL consumerUrl = new URL(CONSUMER_PROTOCOL, parameters.remove(REGISTER_IP_KEY), 0, type.getName(), parameters);
+        /**
+         * new一个实现ClusterInvoker接口的实例 ClusterInvoker继承于Invoker
+         * 此实例就是封装了管理所有provider的invoker 后续的流程是为了构造此invoker
+         */
         ClusterInvoker<T> migrationInvoker = getMigrationInvoker(this, cluster, registry, type, url, consumerUrl);
         return interceptInvoker(migrationInvoker, url, consumerUrl);
     }
@@ -516,11 +524,19 @@ public class RegistryProtocol implements Protocol {
     }
 
     protected <T> Invoker<T> interceptInvoker(ClusterInvoker<T> invoker, URL url, URL consumerUrl) {
+        /**
+         * 通过spi机制获取的RegistryProtocolListener list
+         * 主要是监听invoker属性变化 当属性发生变化时会进行listener回调
+         */
         List<RegistryProtocolListener> listeners = findRegistryProtocolListeners(url);
         if (CollectionUtils.isEmpty(listeners)) {
             return invoker;
         }
-
+        /**
+         * 目前list中只实现了MigrationRuleListener
+         * 作用是监听注册中心变化和配置的变化
+         * 当状态中心或服务配置发生变化时 listener会被回调 invoker会被更新
+         */
         for (RegistryProtocolListener listener : listeners) {
             listener.onRefer(this, invoker, consumerUrl);
         }
@@ -548,7 +564,9 @@ public class RegistryProtocol implements Protocol {
             directory.setRegisteredConsumerUrl(urlToRegistry);
             registry.register(directory.getRegisteredConsumerUrl());
         }
+        //构建路由规则
         directory.buildRouterChain(urlToRegistry);
+        //订阅注册中心 构造providers列表
         directory.subscribe(toSubscribeUrl(urlToRegistry));
 
         return (ClusterInvoker<T>) cluster.join(directory);

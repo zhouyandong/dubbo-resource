@@ -96,10 +96,10 @@ public class MigrationRuleListener implements RegistryProtocolListener, Configur
     @Override
     public synchronized void onRefer(RegistryProtocol registryProtocol, ClusterInvoker<?> invoker, URL url) {
         MigrationInvoker<?> migrationInvoker = (MigrationInvoker<?>) invoker;
-
+        //将invoker继续包装 包装成一层对invoker进行操作的句柄
         MigrationRuleHandler<?> migrationListener = new MigrationRuleHandler<>(migrationInvoker);
         listeners.add(migrationListener);
-
+        //执行对invoker的初始化操作
         migrationListener.doMigrate(rawRule);
     }
 

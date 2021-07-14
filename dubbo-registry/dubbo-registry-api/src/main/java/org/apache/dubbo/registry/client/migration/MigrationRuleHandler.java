@@ -55,6 +55,7 @@ public class MigrationRuleHandler<T> {
         } else {
             switch (rule.getStep()) {
                 case APPLICATION_FIRST:
+                    //初始化invoker
                     migrationInvoker.migrateToServiceDiscoveryInvoker(false);
                     break;
                 case FORCE_APPLICATION:
