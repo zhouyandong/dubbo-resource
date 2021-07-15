@@ -568,7 +568,7 @@ public class RegistryProtocol implements Protocol {
         directory.buildRouterChain(urlToRegistry);
         //订阅注册中心 构造providers列表
         directory.subscribe(toSubscribeUrl(urlToRegistry));
-
+        //在directory外层封装一层cluster层 实现了集群管理的功能 包装了负载均衡、失败重试策略等功能
         return (ClusterInvoker<T>) cluster.join(directory);
     }
 

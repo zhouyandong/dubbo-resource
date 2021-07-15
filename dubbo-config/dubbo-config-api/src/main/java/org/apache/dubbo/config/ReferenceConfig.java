@@ -370,7 +370,10 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
             }
 
             if (urls.size() == 1) {
-                //获取Protocol自适应类 此处获取的是InterfaceCompatibleRegistryProtocol 由ProtocolListenerWrapper和ProtocolFilterWrapper包装
+                /**
+                 * 获取Protocol自适应类 此处获取的是InterfaceCompatibleRegistryProtocol 由ProtocolListenerWrapper和ProtocolFilterWrapper包装
+                 * 最终返回的一个
+                 */
                 invoker = REF_PROTOCOL.refer(interfaceClass, urls.get(0));
             } else {
                 List<Invoker<?>> invokers = new ArrayList<Invoker<?>>();

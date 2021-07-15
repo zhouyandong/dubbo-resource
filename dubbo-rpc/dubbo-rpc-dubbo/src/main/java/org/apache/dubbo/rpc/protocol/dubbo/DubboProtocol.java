@@ -88,7 +88,7 @@ import static org.apache.dubbo.rpc.protocol.dubbo.Constants.SHARE_CONNECTIONS_KE
 
 /**
  * dubbo protocol support.
- * 根据dubbo协议 对服务接口进行暴露
+ * 根据dubbo协议 对服务接口进行暴露或引用
  */
 public class DubboProtocol extends AbstractProtocol {
 
@@ -440,7 +440,7 @@ public class DubboProtocol extends AbstractProtocol {
     /**
      * 生效于客户端
      * 创建向服务端的连接并且返回invoker
-     * invoker封装了
+     * invoker实现了对服务端的调用 完成了request序列化和response反序列化 并且还封装了异步化
      * @param serviceType
      * @param url
      * @param <T>
@@ -458,6 +458,11 @@ public class DubboProtocol extends AbstractProtocol {
         return invoker;
     }
 
+    /**
+     * 创建向providers的连接
+     * @param url
+     * @return
+     */
     private ExchangeClient[] getClients(URL url) {
         // whether to share connection
 
@@ -638,7 +643,7 @@ public class DubboProtocol extends AbstractProtocol {
 
     /**
      * Create new connection
-     *
+     * 创建向provider端服务器的连接 返回netty client
      * @param url
      */
     private ExchangeClient initClient(URL url) {

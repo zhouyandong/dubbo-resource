@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * This class will work as a wrapper wrapping outside of each protocol invoker.
- *
+ * 这一层封装了异步转同步的功能
  * @param <T>
  */
 public class AsyncToSyncInvoker<T> implements Invoker<T> {
@@ -49,9 +49,11 @@ public class AsyncToSyncInvoker<T> implements Invoker<T> {
 
     @Override
     public Result invoke(Invocation invocation) throws RpcException {
+        //invoker进行异步调用 返回一个异步结果
         Result asyncResult = invoker.invoke(invocation);
 
         try {
+            //如果从请求上下文中获取调用方式 如果是同步调用 则线程阻塞等待调用完成
             if (InvokeMode.SYNC == ((RpcInvocation) invocation).getInvokeMode()) {
                 /**
                  * NOTICE!

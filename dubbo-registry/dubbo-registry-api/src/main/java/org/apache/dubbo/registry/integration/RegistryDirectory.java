@@ -108,8 +108,9 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
 
     /**
      * 当注册中心数据发生变更时 此接口被回调
-     * 监听/dubbo/[接口]/configurators+providers+routers节点下的数据
-     * 获取最新的数据并更新
+     * 获取/[root]/[接口]/configurators的数据更新配置
+     * 获取/[root]/[接口]/providers的数据刷新服务方列表
+     * 获取/[root]/[接口]/routers的数据加入路由规则
      * @param urls The list of registered information , is always not empty. The meaning is the same as the return value of {@link org.apache.dubbo.registry.RegistryService#lookup(URL)}.
      */
     @Override
@@ -119,14 +120,15 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
                 .filter(this::isValidCategory)
                 .filter(this::isNotCompatibleFor26x)
                 .collect(Collectors.groupingBy(this::judgeCategory));
-
+        //获取注册中心configurators即配置中心节点数据更新配置
         List<URL> configuratorURLs = categoryUrls.getOrDefault(CONFIGURATORS_CATEGORY, Collections.emptyList());
         this.configurators = Configurator.toConfigurators(configuratorURLs).orElse(this.configurators);
-
+        //获取注册中心routers节点数据新增路由规则
         List<URL> routerURLs = categoryUrls.getOrDefault(ROUTERS_CATEGORY, Collections.emptyList());
         toRouters(routerURLs).ifPresent(this::addRouters);
 
         // providers
+        //获取注册中心providers数据
         List<URL> providerURLs = categoryUrls.getOrDefault(PROVIDERS_CATEGORY, Collections.emptyList());
         /**
          * 3.x added for extend URL address
@@ -138,7 +140,7 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
                 providerURLs = addressListener.notify(providerURLs, getConsumerUrl(),this);
             }
         }
-        //更新invoker列表
+        //获取注册中心providers节点数据更新服务方列表
         refreshOverrideAndInvoker(providerURLs);
     }
 
@@ -156,7 +158,9 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
     // RefreshOverrideAndInvoker will be executed by registryCenter and configCenter, so it should be synchronized.
     private synchronized void refreshOverrideAndInvoker(List<URL> urls) {
         // mock zookeeper://xxx?mock=return null
+        //将获取的配置中心的配置覆盖到本地
         overrideDirectoryUrl();
+        //刷新存储在本地的invokers列表(providers列表)
         refreshInvoker(urls);
     }
 
@@ -197,6 +201,9 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
             if (invokerUrls.isEmpty()) {
                 return;
             }
+            /**
+             * 将从注册中心获取的providers列表转换为invokers列表
+             */
             Map<URL, Invoker<T>> newUrlInvokerMap = toInvokers(invokerUrls);// Translate url list to Invoker map
 
             /**
@@ -350,7 +357,10 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
                     }
                     if (enabled) {
                         /**
-                         *
+                         * 获取url中携带的协议
+                         * 通过spi机制获取对应protocol实例(被wrapper封装过的) 默认是dubbo协议
+                         * 调用protocol实例的refer方法创建invoker
+                         * 此invoker真正实现了和provider交互并且返回rpc调用结果
                          */
                         invoker = new InvokerDelegate<>(protocol.refer(serviceType, url), url, providerUrl);
                     }
