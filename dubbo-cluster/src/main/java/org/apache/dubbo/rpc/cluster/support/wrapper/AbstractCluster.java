@@ -55,6 +55,11 @@ public abstract class AbstractCluster implements Cluster {
 
     protected abstract <T> AbstractClusterInvoker<T> doJoin(Directory<T> directory) throws RpcException;
 
+    /**
+     * 拦截器类
+     * 在调用invoker之前加入拦截逻辑
+     * @param <T>
+     */
     protected class InterceptorInvokerNode<T> extends AbstractClusterInvoker<T> {
 
         private AbstractClusterInvoker<T> clusterInvoker;
@@ -88,6 +93,7 @@ public abstract class AbstractCluster implements Cluster {
         public Result invoke(Invocation invocation) throws RpcException {
             Result asyncResult;
             try {
+                //拦截逻辑+实际调用
                 interceptor.before(next, invocation);
                 asyncResult = interceptor.intercept(next, invocation);
             } catch (Exception e) {

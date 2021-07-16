@@ -36,6 +36,12 @@ import java.util.List;
 import static org.apache.dubbo.rpc.Constants.MOCK_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.INVOCATION_NEED_MOCK;
 
+/**
+ * 在invoker外层封装了一层
+ * 实现服务端Mock
+ * 由spi机制加载的MockClusterWrapper包装类在join时生成
+ * @param <T>
+ */
 public class MockClusterInvoker<T> implements ClusterInvoker<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(MockClusterInvoker.class);
@@ -90,6 +96,9 @@ public class MockClusterInvoker<T> implements ClusterInvoker<T> {
         String value = getUrl().getMethodParameter(invocation.getMethodName(), MOCK_KEY, Boolean.FALSE.toString()).trim();
         if (value.length() == 0 || "false".equalsIgnoreCase(value)) {
             //no mock
+            //获取服务引用过程中生成的invoker进行调用
+            //会跳转到AbstractCluster的内部类InterceptorInvokerNode 由服务引用时cluster.join逻辑完成的
+            //可以实现拦截功能
             result = this.invoker.invoke(invocation);
         } else if (value.startsWith("force")) {
             if (logger.isWarnEnabled()) {
