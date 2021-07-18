@@ -38,7 +38,7 @@ import static org.apache.dubbo.rpc.cluster.Constants.INVOCATION_NEED_MOCK;
 
 /**
  * 在invoker外层封装了一层
- * 实现服务端Mock
+ * 主要用作服务降级 对服务端进行mock调用
  * 由spi机制加载的MockClusterWrapper包装类在join时生成
  * @param <T>
  */
@@ -101,6 +101,7 @@ public class MockClusterInvoker<T> implements ClusterInvoker<T> {
             //可以实现拦截功能
             result = this.invoker.invoke(invocation);
         } else if (value.startsWith("force")) {
+            //服务方已经被降级 直接进行mock
             if (logger.isWarnEnabled()) {
                 logger.warn("force-mock: " + invocation.getMethodName() + " force-mock enabled , url : " + getUrl());
             }
@@ -108,6 +109,7 @@ public class MockClusterInvoker<T> implements ClusterInvoker<T> {
             result = doMockInvoke(invocation, null);
         } else {
             //fail-mock
+            //当调用发生异常时进行mock
             try {
                 result = this.invoker.invoke(invocation);
 

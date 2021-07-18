@@ -31,6 +31,10 @@ import static org.apache.dubbo.common.constants.CommonConstants.COMMA_SPLIT_PATT
 
 /**
  * ConsistentHashLoadBalance
+ * 一致性哈希策略
+ * 相同参数的请求会分发到同一台机器上
+ * 当机器挂掉 会平摊到其他节点
+ * 主要问题是压力分摊不均
  */
 public class ConsistentHashLoadBalance extends AbstractLoadBalance {
     public static final String NAME = "consistenthash";

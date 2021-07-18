@@ -29,6 +29,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Round robin load balance.
+ * 轮询策略 可以为机器设置权重
+ * 缺点是可能出现请求在性能差的机器上累计的情况
  */
 public class RoundRobinLoadBalance extends AbstractLoadBalance {
     public static final String NAME = "roundrobin";
