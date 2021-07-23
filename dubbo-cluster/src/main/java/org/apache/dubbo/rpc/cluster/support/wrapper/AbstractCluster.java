@@ -56,8 +56,6 @@ public abstract class AbstractCluster implements Cluster {
     protected abstract <T> AbstractClusterInvoker<T> doJoin(Directory<T> directory) throws RpcException;
 
     /**
-     * 拦截器类
-     * 在调用invoker之前加入拦截逻辑
      * @param <T>
      */
     protected class InterceptorInvokerNode<T> extends AbstractClusterInvoker<T> {

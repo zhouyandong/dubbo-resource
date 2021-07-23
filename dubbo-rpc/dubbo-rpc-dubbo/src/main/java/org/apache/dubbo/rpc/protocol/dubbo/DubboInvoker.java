@@ -103,6 +103,19 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
                 currentClient.send(inv, isSent);
                 return AsyncRpcResult.newDefaultAsyncResult(invocation);
             } else {
+                /**
+                 * currentClient.request() -> consumer端发送request 发送完成后返回一个CompletableFuture实例cf
+                 * 同时cf被注册到以request_id为key，以future为value的map中
+                 * 当前线程继续向下执行
+                 * 将cf.thenApply()方法的返回值cfa封装到result中返回
+                 *
+                 * 当provider端返回response时 网络层(netty)的网络事件会被触发
+                 * 处理网络事件的线程会根据返回值中的request_id查询map获取map中存储的cf 代码在HeaderExchangeHandler的received()方法中
+                 * 获取到cf之后 执行cf.complete(response) response会通过thenApply()传递到cfa中
+                 *
+                 * 根据url中的参数 判断执行response的线程
+                 * 如果是同步则获取一个ThreadlessExecutor实例 其内部封装了一个阻塞队列
+                 */
                 ExecutorService executor = getCallbackExecutor(getUrl(), inv);
                 CompletableFuture<AppResponse> appResponseFuture =
                         currentClient.request(inv, timeout, executor).thenApply(obj -> (AppResponse) obj);

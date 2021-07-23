@@ -40,6 +40,7 @@ import java.util.concurrent.TimeoutException;
 public class ThreadlessExecutor extends AbstractExecutorService {
     private static final Logger logger = LoggerFactory.getLogger(ThreadlessExecutor.class.getName());
 
+    //阻塞队列
     private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
 
     private ExecutorService sharedExecutor;
@@ -48,8 +49,10 @@ public class ThreadlessExecutor extends AbstractExecutorService {
 
     private boolean finished = false;
 
+    //标记当前是否有线程在等待任务完成
     private volatile boolean waiting = true;
 
+    //锁
     private final Object lock = new Object();
 
     public ThreadlessExecutor(ExecutorService sharedExecutor) {
@@ -71,6 +74,8 @@ public class ThreadlessExecutor extends AbstractExecutorService {
     /**
      * Waits until there is a task, executes the task and all queued tasks (if there're any). The task is either a normal
      * response or a timeout response.
+     * 等待provider response
+     * 从阻塞队列中获取封装了response的任务
      */
     public void waitAndDrain() throws InterruptedException {
         /**
@@ -128,6 +133,12 @@ public class ThreadlessExecutor extends AbstractExecutorService {
      * If the calling thread is still waiting for a callback task, add the task into the blocking queue to wait for schedule.
      * Otherwise, submit to shared callback executor directly.
      *
+     * 外部线程调用此方法 传入的参数为网络层传递的事件
+     * 将事件封装一层
+     * 获取锁
+     * 判断是否有线程在等待结果
+     *  如果有 将其加入到阻塞队列中
+     *  如果没有 则可能出现中断等情况 通过共享线程池处理
      * @param runnable
      */
     @Override

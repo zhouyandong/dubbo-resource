@@ -60,6 +60,11 @@ public class AllChannelHandler extends WrappedChannelHandler {
 
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
+        /**
+         * 获取执行任务的线程池
+         * 将网络层传输的数据进行封装提交到dubbo线程池
+         */
+        System.out.println("get executor : " + Thread.currentThread());
         ExecutorService executor = getPreferredExecutorService(message);
         try {
             executor.execute(new ChannelEventRunnable(channel, handler, ChannelState.RECEIVED, message));

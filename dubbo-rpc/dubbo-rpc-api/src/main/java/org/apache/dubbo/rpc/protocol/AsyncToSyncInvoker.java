@@ -53,7 +53,7 @@ public class AsyncToSyncInvoker<T> implements Invoker<T> {
         Result asyncResult = invoker.invoke(invocation);
 
         try {
-            //如果从请求上下文中获取调用方式 如果是同步调用 则线程阻塞等待调用完成
+            //从请求上下文中获取调用方式 如果是同步调用 则线程阻塞等待调用完成
             if (InvokeMode.SYNC == ((RpcInvocation) invocation).getInvokeMode()) {
                 /**
                  * NOTICE!
