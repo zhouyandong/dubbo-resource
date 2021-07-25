@@ -36,6 +36,14 @@ import java.util.concurrent.TimeoutException;
  * Tasks submitted to this executor through {@link #execute(Runnable)} will not get scheduled to a specific thread, though normal executors always do the schedule.
  * Those tasks are stored in a blocking queue and will only be executed when a thread calls {@link #waitAndDrain()}, the thread executing the task
  * is exactly the same as the one calling waitAndDrain.
+ *
+ * 生产者消费者模型
+ * 内部封装了一个阻塞队列
+ * 消费者调用waitAndDrain()获取阻塞队列中的数据 如果没有数据则等待生产者写入
+ * 生产者调用execute()向阻塞队列中写入数据 并唤醒等待数据的消费者
+ *
+ * 此类主要实现了同步执行封装response的功能
+ * 生产者是netty的事件线程
  */
 public class ThreadlessExecutor extends AbstractExecutorService {
     private static final Logger logger = LoggerFactory.getLogger(ThreadlessExecutor.class.getName());
@@ -87,6 +95,7 @@ public class ThreadlessExecutor extends AbstractExecutorService {
          * 'finished' only appear in waitAndDrain, since waitAndDrain is binding to one RPC call (one thread), the call
          * of it is totally sequential.
          */
+        System.out.println("wait :" + Thread.currentThread());
         if (finished) {
             return;
         }
@@ -103,7 +112,7 @@ public class ThreadlessExecutor extends AbstractExecutorService {
             waiting = false;
             runnable.run();
         }
-
+        System.out.println("wake : " + Thread.currentThread());
         runnable = queue.poll();
         while (runnable != null) {
             runnable.run();
@@ -144,6 +153,7 @@ public class ThreadlessExecutor extends AbstractExecutorService {
     @Override
     public void execute(Runnable runnable) {
         runnable = new RunnableWrapper(runnable);
+        System.out.println("add queue:" + Thread.currentThread());
         synchronized (lock) {
             if (!waiting) {
                 sharedExecutor.execute(runnable);

@@ -171,6 +171,7 @@ public class DubboProtocol extends AbstractProtocol {
 
         @Override
         public void received(Channel channel, Object message) throws RemotingException {
+            System.out.println("dubbo received :" + Thread.currentThread());
             if (message instanceof Invocation) {
                 reply((ExchangeChannel) channel, message);
 

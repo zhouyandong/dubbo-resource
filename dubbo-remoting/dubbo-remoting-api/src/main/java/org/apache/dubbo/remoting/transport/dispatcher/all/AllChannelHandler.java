@@ -61,10 +61,18 @@ public class AllChannelHandler extends WrappedChannelHandler {
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
         /**
+         * 当有receive事件触发时 此方法被网络线程调用
+         *
          * 获取执行任务的线程池
          * 将网络层传输的数据进行封装提交到dubbo线程池
+         *
+         * 此处包含一个同步异步转换逻辑
+         * 当consumer同步调用时 会获取response中的request_id 通过此获取调用时创建的future以及executor
+         *      此executor为请求时创建的ThreadlessExecutor实例 并且调用其execute方法 此方法中包含了一个阻塞队列入队的逻辑
+         *      当任务(包装response)被执行完时 会唤醒阻塞在阻塞队列的线程
+         * 当consumer异步调用时 会获取共享线程池执行任务
          */
-        System.out.println("get executor : " + Thread.currentThread());
+        System.out.println("all channel handler received :" + Thread.currentThread());
         ExecutorService executor = getPreferredExecutorService(message);
         try {
             executor.execute(new ChannelEventRunnable(channel, handler, ChannelState.RECEIVED, message));
@@ -75,6 +83,7 @@ public class AllChannelHandler extends WrappedChannelHandler {
         	}
             throw new ExecutionException(message, channel, getClass() + " error when process received event .", t);
         }
+        System.out.println(" all channel done");
     }
 
     @Override

@@ -16,6 +16,7 @@
  */
 package org.apache.dubbo.demo.consumer;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.config.RegistryConfig;

@@ -107,7 +107,9 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
                  * currentClient.request() -> consumer端发送request 发送完成后返回一个CompletableFuture实例cf
                  * 同时cf被注册到以request_id为key，以future为value的map中
                  * 当前线程继续向下执行
-                 * 将cf.thenApply()方法的返回值cfa封装到result中返回
+                 * cf.thenApply() -> 此方法的返回一个CompletableFuture类型的实例cfa
+                 *                  作用是当cf.complete(obj)方法被调用时 obj会传递到cfa中 并且通知到等待cfa完成的线程
+                 * 将cfa以及其他数据写入到result中返回
                  *
                  * 当provider端返回response时 网络层(netty)的网络事件会被触发
                  * 处理网络事件的线程会根据返回值中的request_id查询map获取map中存储的cf 代码在HeaderExchangeHandler的received()方法中
