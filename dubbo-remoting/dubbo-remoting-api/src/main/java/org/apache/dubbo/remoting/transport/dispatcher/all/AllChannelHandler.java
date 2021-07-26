@@ -70,6 +70,8 @@ public class AllChannelHandler extends WrappedChannelHandler {
          * 当consumer同步调用时 会获取response中的request_id 通过此获取调用时创建的future以及executor
          *      此executor为请求时创建的ThreadlessExecutor实例 详细见ThreadlessExecutor类注释
          * 当consumer异步调用时 会获取共享线程池执行任务 执行的结果会通过CompleteFuture的thenApply()传递到result中
+         *
+         * ChannelEventRunnable实例中封装的handler是DecodeHandler实例 DecodeHandler的next handler是HeaderExchangeHandler
          */
         ExecutorService executor = getPreferredExecutorService(message);
         try {
