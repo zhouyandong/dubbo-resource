@@ -49,10 +49,8 @@ import static org.apache.dubbo.rpc.cluster.Constants.DEFAULT_CLUSTER_STICKY;
 
 /**
  * AbstractClusterInvoker
- * proxy提供了为调用方虚拟了一个
- * proxy之后封装了一个ClusterInvoker
- * 对服务方的所有调用调用逻辑都封装在ClusterInvoker
- * 提供了对所有服务方进行集群管理的功能
+ * 对服务方的所有调用逻辑都封装在ClusterInvoker中
+ * ClusterInvoker提供了对所有服务方进行集群管理的功能
  * 包括负载均衡 路由 重试策略等
  */
 public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
@@ -254,6 +252,15 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
         return null;
     }
 
+    /**
+     * rpc调用入口
+     * 首先在directory中通过路由策略获取可以提供服务的provider列表
+     * 然后获取负载均衡策略
+     * 最后调用派生子类的doInvoke方法进行rpc调用 派生子类中实现了不同的调用策略 比如失败重试、快速失败、广播等
+     * @param invocation
+     * @return
+     * @throws RpcException
+     */
     @Override
     public Result invoke(final Invocation invocation) throws RpcException {
         checkWhetherDestroyed();

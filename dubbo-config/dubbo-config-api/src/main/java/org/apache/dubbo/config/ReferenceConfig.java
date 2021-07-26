@@ -372,7 +372,10 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
             if (urls.size() == 1) {
                 /**
                  * 获取Protocol自适应类 此处获取的是InterfaceCompatibleRegistryProtocol 由ProtocolListenerWrapper和ProtocolFilterWrapper包装
-                 * 最终返回的一个
+                 * 最终返回的一个服务接口执行体 此执行体被层层包装 每一层实现了不同的功能
+                 * MigrationInvoker -> 监听注册中心的通知 当注册中心的数据被推送时 对invokers进行更新
+                 * MockClusterInvoker -> 用作服务降级 服务方被降级时不进行rpc调用 进行本地的mock调用
+                 * ClusterInvoker -> 实际进行rpc调用的invoker 其中封装了服务端路由、负载均衡、调用策略等
                  */
                 invoker = REF_PROTOCOL.refer(interfaceClass, urls.get(0));
             } else {
