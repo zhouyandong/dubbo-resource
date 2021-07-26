@@ -23,9 +23,12 @@ import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.bootstrap.DubboBootstrap;
 import org.apache.dubbo.config.utils.ReferenceConfigCache;
 import org.apache.dubbo.demo.DemoService;
+import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.service.GenericService;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class Application {
     public static void main(String[] args) {
@@ -72,7 +75,30 @@ public class Application {
         reference.setInterface(DemoService.class);
         DemoService service = reference.get();
         String message = service.sayHello("dubbo");
-        System.out.println("message : " + message);
+        System.out.println("zhouyandong message : " + message);
+    }
+
+    /**
+     * 异步的方式
+     * 配置文件中新增配置
+     * <dubbo:reference id="barService" interface="com.alibaba.bar.BarService">
+     *       <dubbo:method name="findBar" async="true" />
+     * </dubbo:reference>
+     */
+    private static void runWithReferAsync() {
+        ReferenceConfig<DemoService> reference = new ReferenceConfig<>();
+        reference.setApplication(new ApplicationConfig("dubbo-demo-api-consumer"));
+        reference.setRegistry(new RegistryConfig("zookeeper://127.0.0.1:2181"));
+        reference.setTimeout(1000000);
+        reference.setInterface(DemoService.class);
+        DemoService service = reference.get();
+        service.sayHello("dubbo");
+        Future<Object> future = RpcContext.getContext().getFuture();
+        try {
+            System.out.println("zhouyandong future message : " + future.get());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static void runWithReferAsy() {

@@ -43,7 +43,17 @@ import java.util.concurrent.TimeoutException;
  * 生产者调用execute()向阻塞队列中写入数据 并唤醒等待数据的消费者
  *
  * 此类主要实现了同步执行封装response的功能
- * 生产者是netty的事件线程
+ * 生产者是网络事件线程
+ * 实现逻辑如下：
+ * 调用线程thread1 调用类AsyncToSyncInvoker实例atsi的invoke方法 执行了其内部invoker的invoke方法
+ *  invoker内部实际会判断请求是否为同步执行 如果是则新建一个ThreadlessExecutor实例te 将其置于回调future中
+ *  然后新建一个AsyncRpcResult实例result 将te和future都封装在arr中
+ *  最后判断其是否为同步调用 如果是 则调用result的get()方法等待provider的响应 此方法实际会调用到te实例的waitAndDrain()
+ *
+ * 当provider端处理完请求之后 将请求发送回consumer端 网络层事件被触发
+ *  网络线程thread2通过响应中的request_id在<request_id,future> map中获取调用时注册的future和te实例
+ *  此时会获取到te实例 并且执行te实例的execute()方法
+ *  execute()方法中将response写入到阻塞队列中 并且唤醒thread1
  */
 public class ThreadlessExecutor extends AbstractExecutorService {
     private static final Logger logger = LoggerFactory.getLogger(ThreadlessExecutor.class.getName());
@@ -95,7 +105,6 @@ public class ThreadlessExecutor extends AbstractExecutorService {
          * 'finished' only appear in waitAndDrain, since waitAndDrain is binding to one RPC call (one thread), the call
          * of it is totally sequential.
          */
-        System.out.println("wait :" + Thread.currentThread());
         if (finished) {
             return;
         }
@@ -112,7 +121,7 @@ public class ThreadlessExecutor extends AbstractExecutorService {
             waiting = false;
             runnable.run();
         }
-        System.out.println("wake : " + Thread.currentThread());
+
         runnable = queue.poll();
         while (runnable != null) {
             runnable.run();
@@ -153,7 +162,6 @@ public class ThreadlessExecutor extends AbstractExecutorService {
     @Override
     public void execute(Runnable runnable) {
         runnable = new RunnableWrapper(runnable);
-        System.out.println("add queue:" + Thread.currentThread());
         synchronized (lock) {
             if (!waiting) {
                 sharedExecutor.execute(runnable);

@@ -114,9 +114,6 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
                  * 当provider端返回response时 网络层(netty)的网络事件会被触发
                  * 处理网络事件的线程会根据返回值中的request_id查询map获取map中存储的cf 代码在HeaderExchangeHandler的received()方法中
                  * 获取到cf之后 执行cf.complete(response) response会通过thenApply()传递到cfa中
-                 *
-                 * 根据url中的参数 判断执行response的线程
-                 * 如果是同步则获取一个ThreadlessExecutor实例 其内部封装了一个阻塞队列
                  */
                 ExecutorService executor = getCallbackExecutor(getUrl(), inv);
                 CompletableFuture<AppResponse> appResponseFuture =

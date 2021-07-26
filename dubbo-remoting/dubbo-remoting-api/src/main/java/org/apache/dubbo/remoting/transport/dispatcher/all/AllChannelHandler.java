@@ -68,11 +68,9 @@ public class AllChannelHandler extends WrappedChannelHandler {
          *
          * 此处包含一个同步异步转换逻辑
          * 当consumer同步调用时 会获取response中的request_id 通过此获取调用时创建的future以及executor
-         *      此executor为请求时创建的ThreadlessExecutor实例 并且调用其execute方法 此方法中包含了一个阻塞队列入队的逻辑
-         *      当任务(包装response)被执行完时 会唤醒阻塞在阻塞队列的线程
-         * 当consumer异步调用时 会获取共享线程池执行任务
+         *      此executor为请求时创建的ThreadlessExecutor实例 详细见ThreadlessExecutor类注释
+         * 当consumer异步调用时 会获取共享线程池执行任务 执行的结果会通过CompleteFuture的thenApply()传递到result中
          */
-        System.out.println("all channel handler received :" + Thread.currentThread());
         ExecutorService executor = getPreferredExecutorService(message);
         try {
             executor.execute(new ChannelEventRunnable(channel, handler, ChannelState.RECEIVED, message));

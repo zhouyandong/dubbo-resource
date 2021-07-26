@@ -49,11 +49,15 @@ public class AsyncToSyncInvoker<T> implements Invoker<T> {
 
     @Override
     public Result invoke(Invocation invocation) throws RpcException {
-        //invoker进行异步调用 返回一个异步结果
+        //invoker进行异步调用 返回一个异步结果 其中封装了rpc调用完成后的回调future
         Result asyncResult = invoker.invoke(invocation);
 
         try {
-            //从请求上下文中获取调用方式 如果是同步调用 则线程阻塞等待调用完成
+            /**
+             * 从请求上下文中获取调用方式
+             *  如果是同步调用 则线程阻塞等待调用完成 返回一个AppResponse实例
+             *  如果是异步调用 则线程不阻塞 直接将invoker返回的AsyncRpcResult实例返回
+             */
             if (InvokeMode.SYNC == ((RpcInvocation) invocation).getInvokeMode()) {
                 /**
                  * NOTICE!
