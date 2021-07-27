@@ -58,7 +58,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.SSL_ENABLED_KEY;
  *  bootstrap:引导类
  *  channel:封装了socket 每个socket都被封装了一个channel
  *          channel被绑定到了channelPipeline上 每个channelPipeline关联了一组channelHandler
- *          实现channelHandler接口并且安装到channelPipeline中即可实现网络触发事件时的业务逻辑
+ *          实现channelHandler接口并且注册到channelPipeline中即可实现网络触发事件时的业务逻辑
  *  bossGroup:负责建立连接的线程组
  *  workerGroup:工作线程组
  */
@@ -103,9 +103,11 @@ public class NettyServer extends AbstractServer implements RemotingServer {
                 getUrl().getPositiveParameter(IO_THREADS_KEY, Constants.DEFAULT_IO_THREADS),
                 "NettyServerWorker");
         /**
-         * 实现了netty的channelHandler接口 入参为nettyServer对象
+         * NettyServerHandler继承了Netty的ChannelDuplexHandler类
+         * 其被注册在ChannelPipeline上 定义了网络事件触发时的处理逻辑
+         * 构造器入参为nettyServer对象 构造的方式有点绕
          * nettyServer本身实现了channelHandler接口 其基类AbstractPeer封装了对实际channelHandler的调用
-         * 实际会调用构造方法中传入的被ChannelHandlers封装的ChannelHandler对象
+         * 实际会调用构造方法中传入的被ChannelHandlers构造的ChannelHandler对象
          * 最终构造的handler链为:
          *  MultiMessageHandler->HeartbeatHandler->AllChannelHandler->
          *  DecodeHandler->HeaderExchangeHandler->DubboProtocol内部的ExchangeHandler
@@ -135,6 +137,7 @@ public class NettyServer extends AbstractServer implements RemotingServer {
                                 .addLast("decoder", adapter.getDecoder())
                                 .addLast("encoder", adapter.getEncoder())
                                 .addLast("server-idle-handler", new IdleStateHandler(0, 0, idleTimeout, MILLISECONDS))
+                                //将nettyServerHandler注册到pipeline
                                 .addLast("handler", nettyServerHandler);
                     }
                 });

@@ -163,15 +163,17 @@ public class DubboProtocol extends AbstractProtocol {
             RpcContext.getContext().setRemoteAddress(channel.getRemoteAddress());
             /**
              * invoker调用
-             * 最终结果返回到Result接口的实例中
              */
             Result result = invoker.invoke(inv);
+            /**
+             * 实际的invoker执行逻辑可能是其内部异步执行
+             * thenApply可以保证任务执行完结果被注入到result
+             */
             return result.thenApply(Function.identity());
         }
 
         @Override
         public void received(Channel channel, Object message) throws RemotingException {
-            System.out.println("dubbo received :" + Thread.currentThread());
             if (message instanceof Invocation) {
                 reply((ExchangeChannel) channel, message);
 

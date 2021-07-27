@@ -172,7 +172,6 @@ public class DefaultFuture extends CompletableFuture<Object> {
                     // decrease Time
                     t.cancel();
                 }
-                System.out.println("default received :" + Thread.currentThread());
                 future.doReceived(response);
             } else {
                 logger.warn("The timeout response finally returned at "
@@ -202,7 +201,6 @@ public class DefaultFuture extends CompletableFuture<Object> {
     }
 
     private void doReceived(Response res) {
-        System.out.println("do received : " + Thread.currentThread());
         if (res == null) {
             throw new IllegalStateException("response cannot be null");
         }

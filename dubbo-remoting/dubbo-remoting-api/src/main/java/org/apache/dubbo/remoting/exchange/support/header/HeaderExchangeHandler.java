@@ -41,9 +41,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.READONLY_EVENT;
 
 /**
  * ExchangeReceiver
- * 请求被反序列化之后传递到此handler
- * 调用协议层如dubbo的handler处理请求并获取response
- * 将response传递回网络层
+ * 在decodeHandler之后
+ * request或response被反序列化之后传递到此handler
  */
 public class HeaderExchangeHandler implements ChannelHandlerDelegate {
 
@@ -58,6 +57,16 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         this.handler = handler;
     }
 
+    /**
+     * 生效于consumer端
+     * 当接收到的数据为response时
+     * 调用DefaultFuture的received方法
+     * 其中主要实现了通过response中携带的request_id 查询<request_id, Future>的映射 获取请求provider时注册的回调Future
+     * 调用Future的doReceived()逻辑
+     * @param channel
+     * @param response
+     * @throws RemotingException
+     */
     static void handleResponse(Channel channel, Response response) throws RemotingException {
         if (response != null && !response.isHeartbeat()) {
             DefaultFuture.received(channel, response);
@@ -78,6 +87,13 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         }
     }
 
+    /**
+     * 生效于provider端
+     * 当接收到的数据为request时 处理请求 并在处理完成后将其发送回consumer端
+     * @param channel
+     * @param req
+     * @throws RemotingException
+     */
     void handleRequest(final ExchangeChannel channel, Request req) throws RemotingException {
         Response res = new Response(req.getId(), req.getVersion());
         if (req.isBroken()) {
@@ -100,7 +116,14 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         // find handler by message class.
         Object msg = req.getData();
         try {
+            /**
+             * 执行具体协议
+             */
             CompletionStage<Object> future = handler.reply(channel, msg);
+            /**
+             * 当任务执行完成后 执行任务的线程回调此方法
+             * 将结果进行封装 发送回consumer端
+             */
             future.whenComplete((appResult, t) -> {
                 try {
                     if (t == null) {
@@ -110,7 +133,6 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                         res.setStatus(Response.SERVICE_ERROR);
                         res.setErrorMessage(StringUtils.toString(t));
                     }
-                    System.out.println("send response : " + Thread.currentThread());
                     channel.send(res);
                 } catch (RemotingException e) {
                     logger.warn("Send result to consumer failed, channel is " + channel + ", msg is " + e);
@@ -121,7 +143,6 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
             res.setErrorMessage(StringUtils.toString(e));
             channel.send(res);
         }
-        System.out.println("done request : " + Thread.currentThread());
     }
 
     @Override

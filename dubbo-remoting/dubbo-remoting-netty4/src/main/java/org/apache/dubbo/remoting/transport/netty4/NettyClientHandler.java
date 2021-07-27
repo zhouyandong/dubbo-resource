@@ -37,7 +37,6 @@ import static org.apache.dubbo.common.constants.CommonConstants.HEARTBEAT_EVENT;
  * 生效于客户端
  * 注册到netty client中
  * 当发生网络IO事件时被触发
- * MultiMessageHandler -> HeartbeatHandler -> AllChannelHandler -> DecodeHandler -> HeaderExchangeHandler -> DubboProtocol$ExchangeHandler
  */
 @io.netty.channel.ChannelHandler.Sharable
 public class NettyClientHandler extends ChannelDuplexHandler {
@@ -45,6 +44,7 @@ public class NettyClientHandler extends ChannelDuplexHandler {
 
     private final URL url;
 
+    //MultiMessageHandler -> HeartbeatHandler -> AllChannelHandler -> DecodeHandler -> HeaderExchangeHandler -> DubboProtocol$ExchangeHandler
     private final ChannelHandler handler;
 
     public NettyClientHandler(URL url, ChannelHandler handler) {

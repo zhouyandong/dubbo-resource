@@ -76,6 +76,15 @@ public class Application {
         DemoService service = reference.get();
         String message = service.sayHello("dubbo");
         System.out.println("zhouyandong message : " + message);
+
+        CompletableFuture<String> completableFuture = service.sayHelloAsync("dubbo1");
+        try {
+            String s = completableFuture.get();
+            System.out.println("zhou message : " + s + " " + Thread.currentThread());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**

@@ -21,9 +21,15 @@ import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.remoting.Channel;
 import org.apache.dubbo.remoting.ChannelHandler;
 
+/**
+ * 将网络事件进行封装
+ * 网络事件被网络层捕捉
+ * 然后对网络事件进行简单的处理 封装成ChannelEventRunnable提交到dubbo线程池 防止阻塞网络IO线程
+ */
 public class ChannelEventRunnable implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(ChannelEventRunnable.class);
 
+    //DecodeHandler及其后续节点
     private final ChannelHandler handler;
     private final Channel channel;
     private final ChannelState state;

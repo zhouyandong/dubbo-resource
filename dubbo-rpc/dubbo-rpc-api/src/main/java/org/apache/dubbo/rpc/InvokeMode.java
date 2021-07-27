@@ -16,6 +16,13 @@
  */
 package org.apache.dubbo.rpc;
 
+/**
+ * 客户端服务调用的方式
+ * 同步:调用者线程发送请求后 阻塞等待服务方返回response
+ * 异步:调用者线程发送请求完成后向请求上下文写入一个Future 调用者线程不阻塞
+ *      当网络层接收到response时网络线程会向Future中注入数据 并通知等待Future完成的线程
+ * Future:和异步相差不大 区别是Future方式是 服务方接口返回值是Future类型 而异步方式是调用方自己包装的Future
+ */
 public enum InvokeMode {
 
     SYNC, ASYNC, FUTURE;

@@ -88,9 +88,6 @@ class FilterNode<T> implements Invoker<T>{
         } finally {
 
         }
-        /**
-         * 支持provider端的异步处理
-         */
         return asyncResult.whenCompleteWithContext((r, t) -> {
             if (filter instanceof ListenableFilter) {
                 ListenableFilter listenableFilter = ((ListenableFilter) filter);

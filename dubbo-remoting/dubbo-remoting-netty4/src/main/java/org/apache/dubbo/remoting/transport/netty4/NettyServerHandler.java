@@ -35,6 +35,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * NettyServerHandler.
+ * 生效于服务端
+ * 注册到Netty server中
+ * 当发生网络IO事件时被触发
  */
 @io.netty.channel.ChannelHandler.Sharable
 public class NettyServerHandler extends ChannelDuplexHandler {
@@ -47,6 +50,7 @@ public class NettyServerHandler extends ChannelDuplexHandler {
 
     private final URL url;
 
+    //MultiMessageHandler -> HeartbeatHandler -> AllChannelHandler -> DecodeHandler -> HeaderExchangeHandler -> DubboProtocol$ExchangeHandler
     private final ChannelHandler handler;
 
     public NettyServerHandler(URL url, ChannelHandler handler) {
@@ -92,13 +96,14 @@ public class NettyServerHandler extends ChannelDuplexHandler {
         }
     }
 
+    //当接收到网络数据时被触发
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         handler.received(channel, msg);
     }
 
-
+    //向网络中写入数据
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         super.write(ctx, msg, promise);

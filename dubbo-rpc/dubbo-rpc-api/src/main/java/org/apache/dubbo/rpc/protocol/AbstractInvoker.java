@@ -160,6 +160,12 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
             invocation.addObjectAttachments(contextAttachments);
         }
 
+        /**
+         * 设置调用方式
+         * future:通过判断接口返回值是否为future类型
+         * 异步:从配置中获取
+         * 同步:默认的调用方式
+         */
         invocation.setInvokeMode(RpcUtils.getInvokeMode(url, invocation));
         RpcUtils.attachInvocationIdIfAsync(getUrl(), invocation);
 
