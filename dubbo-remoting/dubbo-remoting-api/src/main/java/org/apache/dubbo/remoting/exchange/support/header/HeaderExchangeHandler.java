@@ -117,7 +117,10 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         Object msg = req.getData();
         try {
             /**
-             * 执行具体协议
+             * 执行具体协议中封装的handler进行invoker的调用
+             * 返回结果是一个CompletionStage接口下的实例
+             * 好处是其可以对invoker内部的同步和异步进行兼容
+             * 详细见AbstractProxyInvoker.invoke()
              */
             CompletionStage<Object> future = handler.reply(channel, msg);
             /**
@@ -133,6 +136,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                         res.setStatus(Response.SERVICE_ERROR);
                         res.setErrorMessage(StringUtils.toString(t));
                     }
+                    //发送response
                     channel.send(res);
                 } catch (RemotingException e) {
                     logger.warn("Send result to consumer failed, channel is " + channel + ", msg is " + e);
