@@ -103,6 +103,7 @@ public class WrappedChannelHandler implements ChannelHandlerDelegate {
      * 1. Use ThreadlessExecutor, aka., delegate callback directly to the thread initiating the call.
      * 2. Use shared executor to execute the callback.
      *
+     * 获取执行任务的线程池 详细见AllChannelHandler.received()
      * @param msg
      * @return
      */

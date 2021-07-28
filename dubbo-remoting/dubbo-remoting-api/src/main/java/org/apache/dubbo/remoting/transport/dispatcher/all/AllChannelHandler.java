@@ -61,17 +61,19 @@ public class AllChannelHandler extends WrappedChannelHandler {
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
         /**
-         * 当有receive事件触发时 此方法被网络线程调用
+         * 当有receive事件(provider和consumer)触发时 此方法被网络线程调用
          *
          * 获取执行任务的线程池
-         * 将网络层传输的数据进行封装提交到dubbo线程池
+         * 将接收到的网络层数据进行封装提交到业务线程池
          *
-         * 此处包含一个同步异步转换逻辑
+         * 此处包含一个consumer同步异步转换逻辑
          * 当consumer同步调用时 会获取response中的request_id 通过此获取调用时创建的future以及executor
          *      此executor为请求时创建的ThreadlessExecutor实例 详细见ThreadlessExecutor类注释
-         * 当consumer异步调用时 会获取共享线程池执行任务 执行的结果会通过CompleteFuture的thenApply()传递到result中
+         * 当consumer异步调用时 会获取业务线程池执行任务 执行的结果会通过CompleteFuture的thenApply()传递到result中
          *
-         * ChannelEventRunnable实例中封装的handler是DecodeHandler实例 DecodeHandler的next handler是HeaderExchangeHandler
+         * provider端则直接获取业务线程池
+         *
+         * ChannelEventRunnable实例中封装的handler是DecodeHandler实例 handler链的构造见NettyServer
          */
         ExecutorService executor = getPreferredExecutorService(message);
         try {
@@ -83,7 +85,6 @@ public class AllChannelHandler extends WrappedChannelHandler {
         	}
             throw new ExecutionException(message, channel, getClass() + " error when process received event .", t);
         }
-        System.out.println(" all channel done");
     }
 
     @Override

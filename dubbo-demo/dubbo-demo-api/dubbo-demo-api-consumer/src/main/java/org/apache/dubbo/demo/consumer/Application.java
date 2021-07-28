@@ -74,7 +74,7 @@ public class Application {
         reference.setTimeout(1000000);
         reference.setInterface(DemoService.class);
         DemoService service = reference.get();
-        String message = service.sayHello("dubbo");
+        String message = service.sayHello("dubbo"); //实际调用InvokerInvocationHandler.invoke()
         System.out.println("zhouyandong message : " + message);
 
         CompletableFuture<String> completableFuture = service.sayHelloAsync("dubbo1");
