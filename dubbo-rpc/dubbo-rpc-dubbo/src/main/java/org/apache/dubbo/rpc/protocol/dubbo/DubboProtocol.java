@@ -107,7 +107,9 @@ public class DubboProtocol extends AbstractProtocol {
     private final Set<String> optimizers = new ConcurrentHashSet<>();
 
     /**
-     *
+     * 服务暴露时 打开netty服务器
+     * 将requestHandler包装成handler链注册到netty的pipeline中 包装的逻辑在Exchangers.bind()方法中
+     * 当发生网络IO事件时 netty工作线程会调用handler对应的接口方法
      */
     private ExchangeHandler requestHandler = new ExchangeHandlerAdapter() {
 
@@ -328,6 +330,13 @@ public class DubboProtocol extends AbstractProtocol {
         //服务接口+端口 org.apache.xxx.DemoService:20880
         String key = serviceKey(url);
         DubboExporter<T> exporter = new DubboExporter<T>(invoker, key, exporterMap);
+        /**
+         * 将exporter注册到exportMap中
+         * 然后打开了一个Netty服务器
+         * 当服务器接收到request时 会触发receive事件 事件会被传递到requestHandler中 见本类110行
+         * requestHandler中通过从request中获取服务接口+端口拼成key 在exportMap中获取对应的exporter
+         * exporter中封装了invoker 调用invoker的invoke()方法进行业务逻辑处理
+         */
         exporterMap.put(key, exporter);
 
         //export an stub service for dispatching event
@@ -344,6 +353,7 @@ public class DubboProtocol extends AbstractProtocol {
             }
         }
 
+        //打开Netty服务器
         openServer(url);
         optimizeSerialization(url);
 
@@ -396,7 +406,10 @@ public class DubboProtocol extends AbstractProtocol {
 
         ExchangeServer server;
         try {
-            //默认返回一个HeaderExchangeServer
+            /**
+             * requestHandler定义了网络事件触发时的处理逻辑
+             * 将其作为入参进行server构造
+             */
             server = Exchangers.bind(url, requestHandler);
         } catch (RemotingException e) {
             throw new RpcException("Fail to start server(url: " + url + ") " + e.getMessage(), e);
@@ -675,6 +688,7 @@ public class DubboProtocol extends AbstractProtocol {
         ExchangeClient client;
         try {
             // connection should be lazy
+            // 客户端延迟连接 当有调用发起时再创建长连接 用于减少连接数
             if (url.getParameter(LAZY_CONNECT_KEY, false)) {
                 client = new LazyConnectExchangeClient(url, requestHandler);
 

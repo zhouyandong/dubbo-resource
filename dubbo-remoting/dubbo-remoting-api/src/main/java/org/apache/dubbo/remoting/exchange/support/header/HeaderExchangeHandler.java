@@ -176,6 +176,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
             exception = t;
             HeaderExchangeChannel.removeChannelIfDisconnected(channel);
         }
+        //如果请求发送完成 向对应的future写入发送完成的时间
         if (message instanceof Request) {
             Request request = (Request) message;
             DefaultFuture.sent(channel, request);

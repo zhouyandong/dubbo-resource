@@ -222,14 +222,17 @@ public class RegistryProtocol implements Protocol {
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker, providerUrl);
 
         // url to registry
-        // 封装了一组对注册中心的操作
+        // 封装了一组对注册中心的操作 默认返回ZookeeperRegistry
         final Registry registry = getRegistry(originInvoker);
         final URL registeredProviderUrl = getUrlToRegistry(providerUrl, registryUrl);
 
         // decide if we need to delay publish
         boolean register = providerUrl.getParameter(REGISTER_KEY, true);
         if (register) {
-            // 向注册中心注册当前服务节点
+            /**
+             * 向注册中心注册当前服务节点 将当前节点注册为临时节点
+             * 当断开与注册中心的连接时 临时节点会被删除 注册中心会通知到订阅方
+             */
             registry.register(registeredProviderUrl);
         }
 

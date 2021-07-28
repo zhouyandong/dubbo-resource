@@ -86,6 +86,13 @@ public class NettyServer extends AbstractServer implements RemotingServer {
     public NettyServer(URL url, ChannelHandler handler) throws RemotingException {
         // you can customize name and type of client thread pool by THREAD_NAME_KEY and THREADPOOL_KEY in CommonConstants.
         // the handler will be wrapped: MultiMessageHandler->HeartbeatHandler->handler
+        /**
+         * handler被封装的结构为
+         * MultiMessageHandler -> HeartbeatHandler -> Dispatcher接口自适应类选择的Handler
+         * MultiMessageHandler:判断是否为多条消息 是的话循环处理
+         * HeartbeatHandler:处理心跳消息
+         * Dispatcher -> 如AllChannelHandler:网络IO事件是网络层线程处理 此Handler决定网络事件向业务线程池的派发策略 详细见Dispatcher
+         */
         super(ExecutorUtil.setThreadName(url, SERVER_THREAD_POOL_NAME), ChannelHandlers.wrap(handler, url));
     }
 
@@ -109,8 +116,8 @@ public class NettyServer extends AbstractServer implements RemotingServer {
          * nettyServer本身实现了channelHandler接口 其基类AbstractPeer封装了对实际channelHandler的调用
          * 实际会调用构造方法中传入的被ChannelHandlers构造的ChannelHandler对象
          * 最终构造的handler链为:
-         *  MultiMessageHandler->HeartbeatHandler->AllChannelHandler->
-         *  DecodeHandler->HeaderExchangeHandler->DubboProtocol内部的ExchangeHandler
+         *  MultiMessageHandler->HeartbeatHandler->Dispatcher接口通过SPI机制生成的Handler-> (见ChannelHandlers.wrap())
+         *  DecodeHandler->HeaderExchangeHandler->DubboProtocol内部的ExchangeHandler (见HeaderExchanger.bind())
          */
         final NettyServerHandler nettyServerHandler = new NettyServerHandler(getUrl(), this);
         channels = nettyServerHandler.getChannels();

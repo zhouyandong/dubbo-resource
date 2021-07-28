@@ -206,6 +206,11 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
             return;
         }
 
+        /**
+         * 延迟暴露
+         * 服务自身可能会进行初始化或者资源预热操作 加载的时间可能比较长 如果直接进行暴露在初始化期间可能会抛弃请求
+         * 延迟暴露可以避免此问题
+         */
         if (shouldDelay()) {
             DELAY_EXPORT_EXECUTOR.schedule(this::doExport, getDelay(), TimeUnit.MILLISECONDS);
         } else {

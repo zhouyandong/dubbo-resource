@@ -22,6 +22,7 @@ import org.apache.dubbo.remoting.Dispatcher;
 
 /**
  * Direct dispatcher
+ * 所有的网络事件都在IO线程上直接执行 不向其他线程池派发事件
  */
 public class DirectDispatcher implements Dispatcher {
 

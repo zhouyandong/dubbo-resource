@@ -22,6 +22,8 @@ import org.apache.dubbo.remoting.Dispatcher;
 
 /**
  * connect disconnect ensure the order
+ * 将连接和断开连接事件放入队列有序执行
+ * 其他事件派发到线程池执行
  */
 public class ConnectionOrderedDispatcher implements Dispatcher {
 

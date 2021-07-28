@@ -28,7 +28,11 @@ import org.apache.dubbo.remoting.transport.DecodeHandler;
 /**
  * DefaultMessenger
  *
- *
+ * 封装注册在网络层的handler
+ * connect()生效在client端
+ * bind()生效在server端
+ * 将在协议暴露中
+ * 将handler外层封装两层
  */
 public class HeaderExchanger implements Exchanger {
 

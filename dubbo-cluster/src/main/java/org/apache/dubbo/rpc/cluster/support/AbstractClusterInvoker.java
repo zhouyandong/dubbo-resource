@@ -145,6 +145,11 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
         }
         String methodName = invocation == null ? StringUtils.EMPTY_STRING : invocation.getMethodName();
 
+        /**
+         * 判断是否开启粘滞连接 如果是则总向同一provider发起调用 除非provider挂了
+         * 粘滞连接会自动开启延迟连接
+         * 为了减少长连接数
+         */
         boolean sticky = invokers.get(0).getUrl()
                 .getMethodParameter(methodName, CLUSTER_STICKY_KEY, DEFAULT_CLUSTER_STICKY);
 
